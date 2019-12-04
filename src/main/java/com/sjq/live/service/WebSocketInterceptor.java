@@ -35,7 +35,7 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
             map.put("subscribeId", subscribeId);
             isPass = true;
         }
-        return false;
+        return isPass;
     }
 
     @Override
