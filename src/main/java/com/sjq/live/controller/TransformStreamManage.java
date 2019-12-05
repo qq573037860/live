@@ -48,7 +48,7 @@ public class TransformStreamManage {
         if (outStreamMap.containsKey(publishId)) {//同一个流，只允许发布一次
             return null;
         }
-        //开启ffmpeg视频流转换进程，会在in中读取originStream，然后将transformedStream写入到out中
+        //开启ffmpeg视频流转换进程，会在originStream读取原始数据，然后将转换后的数据发到transformedStream中
         Process process = null;
         try {
             process = FfmpegUtil.convertStream("http://" + serverIp + ":" + serverPort + "/originStream?publishId" + publishId,
