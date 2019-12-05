@@ -11,13 +11,17 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired
     private WebSocketInterceptor interceptor;
+
     @Autowired
-    private OriginStreamProcessor processor;
+    private OriginStreamProcessor origin;
+    @Autowired
+    private LiveStreamProcessor live;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry
-                .addHandler(processor, "ws/pushStream")
+                .addHandler(origin, "ws/pushStream")
+                .addHandler(live, "ws/receiveStream")
                 .addInterceptors(interceptor)
                 .setAllowedOrigins("*");
     }
