@@ -1,6 +1,6 @@
 package com.sjq.live.service;
 
-import com.sjq.live.controller.TransformedStreamManage;
+import com.sjq.live.controller.TransformStreamManage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by shenjq on 2019/12/2
@@ -24,7 +23,7 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
 
 
     @Autowired
-    private TransformedStreamManage manage;
+    private TransformStreamManage manage;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -46,9 +45,14 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
             new Thread(() -> {
                 session.getAttributes().put("streamHandler", manage.publish(map.get("publishId").toString()));
             }).start();
-        } else if (handler instanceof TransformedStreamManage.StreamWriteHandler) {
+        } else if (handler instanceof TransformStreamManage.StreamWriteHandler) {
             //向管道中写入数据
-            ((TransformedStreamManage.StreamWriteHandler)handler).write(message.getPayload().array());
+            TransformStreamManage.StreamWriteHandler writeHandler = (TransformStreamManage.StreamWriteHandler)handler;
+            if (message.isLast()) {
+                writeHandler.writeWithFlush(message.getPayload().array());
+            } else {
+                writeHandler.write(message.getPayload().array());
+            }
         }
     }
 
@@ -56,8 +60,8 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         //关闭管道
         Object handler = session.getAttributes().get("streamHandler");
-        if (null != handler && handler instanceof TransformedStreamManage.StreamWriteHandler) {
-            ((TransformedStreamManage.StreamWriteHandler)handler).close();
+        if (null != handler && handler instanceof TransformStreamManage.StreamWriteHandler) {
+            ((TransformStreamManage.StreamWriteHandler)handler).close();
         }
         logger.info("client onclose：" + session.toString());
     }
