@@ -35,9 +35,8 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
         //订阅
         Map<String, Object> map = session.getAttributes();
         String subscribeId = map.get("subscribeId").toString();
-        String registerId = map.get("registerId").toString();
 
-        if (null == registerId) {//不能重复订阅
+        if (null == map.get("registerId")) {//不能重复订阅
             map.put("registerId", manage.subscribe(subscribeId, new ReadHandlerImpl(session)).getName());
         }
 
@@ -47,9 +46,11 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Map<String, Object> map = session.getAttributes();
-        String subscribeId = map.get("subscribeId").toString();
-        String registerId = map.get("registerId").toString();
-        manage.unSubscribe(subscribeId, registerId);
+        if (null != map.get("registerId")) {
+            String subscribeId = map.get("subscribeId").toString();
+            String registerId = map.get("registerId").toString();
+            manage.unSubscribe(subscribeId, registerId);
+        }
 
         logger.info("client onclose：" + session.toString());
     }
@@ -66,9 +67,14 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
         public void read(byte[] bytes) {
             if (session.isOpen()) {
                 try {
-                    session.sendMessage(new BinaryMessage(bytes));
-                } catch (IOException e) {
+                    session.sendMessage(new BinaryMessage(bytes, true));
+                } catch (Exception e) {
                     logger.error("session:" + session.toString() + "，数据发送失败！", e);
+                    try {
+                        session.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }

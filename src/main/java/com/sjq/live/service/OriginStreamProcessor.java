@@ -29,15 +29,19 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
     private TransformStreamManage manage;
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         logger.info("client opened: " + session.toString());
 
-        FileInputStream in = new FileInputStream("D:\\BaiduNetdiskDownload\\01Python快速入门\\b_edit.mp4");
+        //获取写入流句柄
+        Map<String, Object> map = session.getAttributes();
+        map.put("streamHandler", manage.publish(map.get("publishId").toString()));
+
+/*        FileInputStream in = new FileInputStream("D:\\BaiduNetdiskDownload\\01Python快速入门\\b_edit.mp4");
         byte[] bytes = new byte[1024];
         int len = 0;
         while ((len = in.read(bytes)) != -1) {
             handleBinaryMessage(session, new BinaryMessage(bytes, 0, len, true));
-        }
+        }*/
     }
 
     /**
@@ -48,30 +52,21 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         Map<String, Object> map = session.getAttributes();
-        Object handler = map.get("streamHandler");
-        if (null == handler) {
-            map.put("streamHandler", "init");
-            //异步设置streamPipeline，可能会存在数据感知不及时的问题，但对于直播的场景而言问题不大
-            new Thread(() -> {
-                session.getAttributes().put("streamHandler", manage.publish(map.get("publishId").toString()));
-            }).start();
-        } else if (handler instanceof TransformStreamManage.StreamWriteHandler) {
-            //向管道中写入数据
-            TransformStreamManage.StreamWriteHandler writeHandler = (TransformStreamManage.StreamWriteHandler)handler;
-            if (message.isLast()) {
-                writeHandler.writeWithFlush(message.getPayload().array());
-            } else {
-                writeHandler.write(message.getPayload().array());
-            }
+        //向管道中写入数据
+        TransformStreamManage.StreamWriteHandler writeHandler = (TransformStreamManage.StreamWriteHandler)map.get("streamHandler");
+        if (message.isLast()) {
+            writeHandler.writeWithFlush(message.getPayload().array());
+        } else {
+            writeHandler.write(message.getPayload().array());
         }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         //关闭管道
-        Object handler = session.getAttributes().get("streamHandler");
-        if (null != handler && handler instanceof TransformStreamManage.StreamWriteHandler) {
-            ((TransformStreamManage.StreamWriteHandler)handler).close();
+        TransformStreamManage.StreamWriteHandler handler = (TransformStreamManage.StreamWriteHandler) session.getAttributes().get("streamHandler");
+        if (null != handler) {
+            handler.close();
         }
         logger.info("client onclose：" + session.toString());
     }

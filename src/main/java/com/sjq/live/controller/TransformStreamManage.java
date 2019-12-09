@@ -34,7 +34,7 @@ public class TransformStreamManage {
     @Value("${server.extranet}")
     private String serverIp;
 
-    private Map<String, Object[]> outStreamMap = new ConcurrentHashMap<>();
+    private Map<String, PipedOutputStream> outStreamMap = new ConcurrentHashMap<>();
     private Map<String, StreamReadTask> taskMap = new ConcurrentHashMap<>();
 
     private void removeMap(String publishId) {
@@ -56,21 +56,17 @@ public class TransformStreamManage {
             return null;
         }
         //寻找写入管道流
-        ServletOutputStream out = null;
-        Thread handler = null;
+        PipedOutputStream out = null;
         for (;;) {
-            if (null == out || null == handler) {
-                Object[] arr = outStreamMap.get(publishId);
-                if (null == out) {
-                    continue;
+            if (null == out) {
+                out = outStreamMap.get(publishId);;
+                if (null != out) {
+                    break;
                 }
-                out = (ServletOutputStream) arr[0];
-                handler = (Thread) arr[1];
-                break;
             }
         }
 
-        return new StreamWriteHandler(out, handler, process, publishId);
+        return new StreamWriteHandler(out, process, publishId);
     }
 
     public SubscribeEnum subscribe(String subscribeId, ReadHandler handler) {
@@ -110,11 +106,20 @@ public class TransformStreamManage {
     public void originStream(HttpServletResponse response, String publishId) throws Exception {
         ServletOutputStream out = response.getOutputStream();
 
-        Thread currentThread = Thread.currentThread();
         //注册管道流
-        outStreamMap.put(publishId, new Object[]{out, currentThread});
-        LockSupport.park(currentThread);
-
+        PipedOutputStream outPipe = new PipedOutputStream();
+        PipedInputStream inPipe = new PipedInputStream(1024*1024);
+        outPipe.connect(inPipe);
+        outStreamMap.put(publishId, outPipe);
+        //从管道中读取数据
+        byte[] bytes = new byte[1024];
+        int len;
+        while ((len = inPipe.read(bytes)) != -1) {
+            out.write(bytes, 0, len);
+            out.flush();
+        }
+        inPipe.close();
+        out.close();
         logger.info("publishId:{}, originStream流关闭", publishId);
     }
 
@@ -141,14 +146,12 @@ public class TransformStreamManage {
 
     public class StreamWriteHandler{
 
-        private ServletOutputStream out;
-        private Thread handler;
+        private PipedOutputStream out;
         private Process process;
         private String publishId;
 
-        StreamWriteHandler(ServletOutputStream out, Thread handler, Process process, String publishId) {
+        StreamWriteHandler(PipedOutputStream out, Process process, String publishId) {
             this.out = out;
-            this.handler = handler;
             this.process = process;
             this.publishId = publishId;
         }
@@ -176,7 +179,6 @@ public class TransformStreamManage {
             process.destroyForcibly();
             try {
                 out.close();
-                LockSupport.unpark(handler);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -254,7 +256,6 @@ public class TransformStreamManage {
                                         headerDataOutStream.close();
                                         headerDataOutStream = null;
                                     }
-                                    headerDataOutStream.write(tagHeader);
                                 }
                                 sendTagHeader = true;
                             }
@@ -264,7 +265,7 @@ public class TransformStreamManage {
                         }
 
                         //读取tagData
-                        if (startReadKeyFrameTag || subscribes.size() > 0) {
+                        if (leftTagDataToRead > 0 && (startReadKeyFrameTag || subscribes.size() > 0)) {
                             int readLength = len - tagDataIndex > leftTagDataToRead ? leftTagDataToRead : len - tagDataIndex;
                             byte[] tagData = null;
                             boolean isTagHeaderStart = sendTagHeader;
@@ -317,8 +318,7 @@ public class TransformStreamManage {
                 if (isTagHeaderStart) {//要从一个tagHeader开始读数据
                     read(headerData);
                     isFirst = false;
-                }
-                if (isFirst) {
+                } else {
                     return;
                 }
             }
