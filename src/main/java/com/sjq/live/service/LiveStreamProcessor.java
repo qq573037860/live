@@ -27,8 +27,6 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(LiveStreamProcessor.class);
 
-    private static Map<String, Set<WebSocketSession>> subscribeMap = new ConcurrentHashMap<>();
-
     @Autowired
     private TransformStreamManage manage;
 
@@ -37,56 +35,40 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
         //订阅
         Map<String, Object> map = session.getAttributes();
         String subscribeId = map.get("subscribeId").toString();
+        String registerId = map.get("registerId").toString();
 
-        //记录订阅session
-        Set<WebSocketSession> set = subscribeMap.computeIfAbsent(subscribeId, k -> new ConcurrentSkipListSet<>());
-        if (set.size() == 0) {//同一个主题只用订阅一次
-            manage.subscribe(subscribeId, new ReadHandlerImpl(subscribeId));
+        if (null == registerId) {//不能重复订阅
+            map.put("registerId", manage.subscribe(subscribeId, new ReadHandlerImpl(session)).getName());
         }
-        set.add(session);
 
         logger.info("client opened: " + session.toString());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        Iterator<Set<WebSocketSession>> setIterator = subscribeMap.values().iterator();
-        while (setIterator.hasNext()) {
-            Set<WebSocketSession> set = setIterator.next();
-            Iterator<WebSocketSession> it = set.iterator();
-            while (it.hasNext()) {
-                WebSocketSession webSocketSession = it.next();
-                if (webSocketSession.getId().equals(session.getId())) {
-                    it.remove();
-                }
-            }
-            if (set.size() == 0) {
-                setIterator.remove();
-            }
-        }
+        Map<String, Object> map = session.getAttributes();
+        String subscribeId = map.get("subscribeId").toString();
+        String registerId = map.get("registerId").toString();
+        manage.unSubscribe(subscribeId, registerId);
+
         logger.info("client onclose：" + session.toString());
     }
 
     class ReadHandlerImpl extends ReadHandler {
 
-        private String subscribeId;
+        private WebSocketSession session;
 
-        ReadHandlerImpl(String subscribeId) {
-            this.subscribeId = subscribeId;
+        ReadHandlerImpl(WebSocketSession session) {
+            this.session = session;
         }
 
         @Override
         public void read(byte[] bytes) {
-            Set<WebSocketSession> set = subscribeMap.get(subscribeId);
-            Iterator<WebSocketSession> it = set.iterator();
-            while (it.hasNext()) {
-                WebSocketSession session = it.next();
-                if (session.isOpen()) {
-                    try {
-                        session.sendMessage(new BinaryMessage(bytes));
-                    } catch (IOException e) {
-                        logger.error("session:" + session.toString() + "，数据发送失败！", e);
-                    }
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new BinaryMessage(bytes));
+                } catch (IOException e) {
+                    logger.error("session:" + session.toString() + "，数据发送失败！", e);
                 }
             }
         }

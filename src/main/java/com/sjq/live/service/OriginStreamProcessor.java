@@ -10,6 +10,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -26,8 +29,15 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
     private TransformStreamManage manage;
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
+    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         logger.info("client opened: " + session.toString());
+
+        FileInputStream in = new FileInputStream("D:\\BaiduNetdiskDownload\\01Python快速入门\\b_edit.mp4");
+        byte[] bytes = new byte[1024];
+        int len = 0;
+        while ((len = in.read(bytes)) != -1) {
+            handleBinaryMessage(session, new BinaryMessage(bytes, 0, len, true));
+        }
     }
 
     /**

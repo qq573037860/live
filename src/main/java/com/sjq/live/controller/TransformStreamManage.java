@@ -15,9 +15,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Created by shenjq on 2019/11/29
@@ -34,9 +34,7 @@ public class TransformStreamManage {
     @Value("${server.extranet}")
     private String serverIp;
 
-    private Map<String, PipedOutputStream> outStreamMap = new ConcurrentHashMap<>();
-    private Map<String, PipedInputStream> inStreamMap = new ConcurrentHashMap<>();
-
+    private Map<String, Object[]> outStreamMap = new ConcurrentHashMap<>();
     private Map<String, StreamReadTask> taskMap = new ConcurrentHashMap<>();
 
     private void removeMap(String publishId) {
@@ -45,9 +43,9 @@ public class TransformStreamManage {
     }
 
     public StreamWriteHandler publish(String publishId) {
-        if (outStreamMap.containsKey(publishId)) {//同一个流，只允许发布一次
+        /*if (!outStreamMap.containsKey(publishId)) {//同一个流，只允许发布一次
             return null;
-        }
+        }*/
         //开启ffmpeg视频流转换进程，会在originStream读取原始数据，然后将转换后的数据发到transformedStream中
         Process process = null;
         try {
@@ -57,37 +55,50 @@ public class TransformStreamManage {
             logger.error("开启ffmpeg视频流转换进程失败", e);
             return null;
         }
-        //寻找管道流
-        PipedOutputStream out = null;
+        //寻找写入管道流
+        ServletOutputStream out = null;
+        Thread handler = null;
         for (;;) {
-            if (null == out) {
-                out = outStreamMap.get(publishId);
+            if (null == out || null == handler) {
+                Object[] arr = outStreamMap.get(publishId);
                 if (null == out) {
                     continue;
                 }
+                out = (ServletOutputStream) arr[0];
+                handler = (Thread) arr[1];
                 break;
             }
         }
 
-        return new StreamWriteHandler(out, process, publishId);
+        return new StreamWriteHandler(out, handler, process, publishId);
     }
 
     public SubscribeEnum subscribe(String subscribeId, ReadHandler handler) {
-        if (!outStreamMap.containsKey(subscribeId)) {
-            return SubscribeEnum.NO_PUBLISHER;
-        }
-        if (!inStreamMap.containsKey(subscribeId)) {
-            return SubscribeEnum.SUBSCRIBED;
-        }
         if (null == handler) {
             return SubscribeEnum.READ_HANDLER_IS_NULL;
         }
 
-        StreamReadTask task = taskMap.computeIfAbsent(subscribeId, k -> new StreamReadTask(inStreamMap.get(subscribeId)));
+        StreamReadTask task = taskMap.get(subscribeId);
+        if (null == task) {
+            return SubscribeEnum.NO_PUBLISHER;
+        }
+        handler.setId(UUID.randomUUID().toString());
         task.addSubscribe(handler);
-        inStreamMap.remove(subscribeId);
 
-        return SubscribeEnum.SUCCESS;
+        return SubscribeEnum.SUCCESS.name(handler.getId());
+    }
+
+    public void unSubscribe(String subscribeId, String id) {
+        StreamReadTask task = taskMap.get(subscribeId);
+        if (null != task) {
+            List<ReadHandler> list = task.getSubscribes();
+            for (int i = 0, length = list.size(); i < length; i++) {
+                if (list.get(i).getId().equals(id)) {
+                    list.remove(i);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -98,20 +109,11 @@ public class TransformStreamManage {
     @RequestMapping("/originStream")
     public void originStream(HttpServletResponse response, String publishId) throws Exception {
         ServletOutputStream out = response.getOutputStream();
-        //建立管道
-        PipedOutputStream outPipe = new PipedOutputStream();
-        PipedInputStream inPipe = new PipedInputStream();
-        outPipe.connect(inPipe);
-        //注册管道
-        outStreamMap.put(publishId, outPipe);
-        //从管道中读取视频流数据
-        byte[] bytes = new byte[1024];
-        int len;
-        while ((len = inPipe.read(bytes)) != -1) {
-            out.write(bytes, 0, len);
-            out.flush();
-        }
-        inPipe.close();
+
+        Thread currentThread = Thread.currentThread();
+        //注册管道流
+        outStreamMap.put(publishId, new Object[]{out, currentThread});
+        LockSupport.park(currentThread);
 
         logger.info("publishId:{}, originStream流关闭", publishId);
     }
@@ -124,40 +126,36 @@ public class TransformStreamManage {
     @RequestMapping("/transformedStream")
     public void transformedStream(HttpServletRequest request, String publishId) throws Exception {
         ServletInputStream in = request.getInputStream();
-        //建立管道
-        PipedOutputStream outPipe = new PipedOutputStream();
-        PipedInputStream inPipe = new PipedInputStream();
-        outPipe.connect(inPipe);
-        //注册管道
-        inStreamMap.put(publishId, inPipe);
-        //向管道中写视频流数据
-        byte[] bytes = new byte[1024];
-        int len;
-        while ((len = in.read(bytes)) != -1) {
-            outPipe.write(bytes, 0, len);
-            outPipe.flush();
+
+        //开启读取transformedStream流的线程
+        StreamReadTask task = taskMap.get(publishId);
+        if (null == task) {
+            task = new StreamReadTask(in);
+            //注册读流任务
+            taskMap.put(publishId, task);
+            task.run();
         }
-        outPipe.close();
-        in.close();
 
         logger.info("publishId:{}, transformedStream流关闭", publishId);
     }
 
     public class StreamWriteHandler{
 
-        private PipedOutputStream outPipe;
+        private ServletOutputStream out;
+        private Thread handler;
         private Process process;
         private String publishId;
 
-        StreamWriteHandler(PipedOutputStream outPipe, Process process, String publishId) {
-            this.outPipe = outPipe;
+        StreamWriteHandler(ServletOutputStream out, Thread handler, Process process, String publishId) {
+            this.out = out;
+            this.handler = handler;
             this.process = process;
             this.publishId = publishId;
         }
 
         public void write(byte[] bytes) {
             try {
-                outPipe.write(bytes);
+                out.write(bytes);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -167,7 +165,7 @@ public class TransformStreamManage {
         public void writeWithFlush(byte[] bytes) {
             write(bytes);
             try {
-                outPipe.flush();
+                out.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -177,7 +175,8 @@ public class TransformStreamManage {
         public void close() {
             process.destroyForcibly();
             try {
-                outPipe.close();
+                out.close();
+                LockSupport.unpark(handler);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -186,20 +185,23 @@ public class TransformStreamManage {
 
     }
 
-    class StreamReadTask implements Runnable {
+    class StreamReadTask {
 
-        private PipedInputStream inPipe;
+        private ServletInputStream in;
         private List<ReadHandler> subscribes = Collections.synchronizedList(new ArrayList<>());
 
-        StreamReadTask(PipedInputStream inPipe) {
-            this.inPipe = inPipe;
+        StreamReadTask(ServletInputStream inPipe) {
+            this.in = inPipe;
         }
 
         public void addSubscribe(ReadHandler handler) {
             this.subscribes.add(handler);
         }
 
-        @Override
+        List<ReadHandler> getSubscribes() {
+            return subscribes;
+        }
+
         public void run() {
             //头部数据，包含flvHeader 和 keyFrames
             ByteArrayOutputStream headerDataOutStream = new ByteArrayOutputStream();
@@ -208,7 +210,7 @@ public class TransformStreamManage {
             //读取flvHeader
             byte[] flvHeader = new byte[13];
             try {
-                inPipe.read(flvHeader);
+                in.read(flvHeader);
                 headerDataOutStream.write(flvHeader);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -228,7 +230,7 @@ public class TransformStreamManage {
             byte[] bytes = new byte[1024];
             int len;
             try {
-                while ((len = inPipe.read(bytes)) != -1) {
+                while ((len = in.read(bytes)) != -1) {
                     //tagHeader读取起始位置
                     int tagHeaderIndex = 0;
                     //tagData读取起始位置
@@ -250,6 +252,7 @@ public class TransformStreamManage {
                                         startReadKeyFrameTag = false;
                                         headerData = headerDataOutStream.toByteArray();
                                         headerDataOutStream.close();
+                                        headerDataOutStream = null;
                                     }
                                     headerDataOutStream.write(tagHeader);
                                 }
@@ -264,6 +267,7 @@ public class TransformStreamManage {
                         if (startReadKeyFrameTag || subscribes.size() > 0) {
                             int readLength = len - tagDataIndex > leftTagDataToRead ? leftTagDataToRead : len - tagDataIndex;
                             byte[] tagData = null;
+                            boolean isTagHeaderStart = sendTagHeader;
                             if (sendTagHeader) {
                                 tagData = FlvUtils.byteMerger(tagHeader, Arrays.copyOfRange(bytes, tagDataIndex, tagDataIndex + readLength));
                                 sendTagHeader = false;
@@ -277,7 +281,7 @@ public class TransformStreamManage {
                             } else {
                                 //给订阅者发送数据
                                 for (ReadHandler handler : subscribes) {
-                                    handler.read(tagData, headerData);
+                                    handler.read(tagData, headerData, isTagHeaderStart);
                                 }
                             }
                         }
@@ -296,7 +300,7 @@ public class TransformStreamManage {
                     }
 
                 }
-                inPipe.close();
+                in.close();
             } catch (Exception e) {
                 logger.error("读取流失败：", e);
             }
@@ -305,17 +309,30 @@ public class TransformStreamManage {
 
     public static abstract class ReadHandler {
 
+        private String id;
         private boolean isFirst = true;
 
-        private void read(byte[] bytes, byte[] headerData) {
+        private void read(byte[] bytes, byte[] headerData, boolean isTagHeaderStart) {
             if (isFirst) {//第一次发送的起始数据(包含flvHeader 和 keyFrames)
-                read(headerData);
-                isFirst = true;
+                if (isTagHeaderStart) {//要从一个tagHeader开始读数据
+                    read(headerData);
+                    isFirst = false;
+                }
+                if (isFirst) {
+                    return;
+                }
             }
             read(bytes);
         }
 
         public abstract void read(byte[] bytes);
 
+        private String getId() {
+            return id;
+        }
+
+        private void setId(String id) {
+            this.id = id;
+        }
     }
 }
