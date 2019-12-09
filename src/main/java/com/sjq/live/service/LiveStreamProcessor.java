@@ -1,5 +1,6 @@
 package com.sjq.live.service;
 
+import com.sjq.live.constant.SubscribeEnum;
 import com.sjq.live.controller.TransformStreamManage;
 import com.sjq.live.controller.TransformStreamManage.ReadHandler;
 import org.slf4j.Logger;
@@ -33,7 +34,10 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
         String subscribeId = map.get("subscribeId").toString();
 
         if (null == map.get("registerId")) {//不能重复订阅
-            map.put("registerId", manage.subscribe(subscribeId, new ReadHandlerImpl(session)).getName());
+            SubscribeEnum subscribeEnum = manage.subscribe(subscribeId, new ReadHandlerImpl(session));
+            if (0 == subscribeEnum.getCode()) {
+                map.put("registerId", subscribeEnum.getName());
+            }
         }
 
         logger.info("client opened: " + session.toString());
