@@ -30,7 +30,7 @@ public class TransformStreamManage {
     private static final Logger logger = LoggerFactory.getLogger(TransformStreamManage.class);
 
     @Value("${server.port}")
-    private int serverPort;
+    private Integer serverPort;
     @Value("${server.extranet}")
     private String serverIp;
 
@@ -51,8 +51,8 @@ public class TransformStreamManage {
         //开启ffmpeg视频流转换进程，会在originStream读取原始数据，然后将转换后的数据发到transformedStream中
         Process process = null;
         try {
-            process = FfmpegUtil.convertStream("http://" + serverIp + ":" + serverPort + "/originStream?publishId" + publishId,
-                    "http://" + serverIp + ":" + serverPort + "/transformedStream?publishId" + publishId);
+            process = FfmpegUtil.convertStream("http://" + serverIp + ":" + serverPort + "/originStream?publishId=" + publishId,
+                    "http://" + serverIp + ":" + serverPort + "/transformedStream?publishId=" + publishId);
         } catch (FFmpegException e) {
             logger.error("开启ffmpeg视频流转换进程失败", e);
             return null;
@@ -62,6 +62,9 @@ public class TransformStreamManage {
         for (;;) {
             if (null == out) {
                 out = outStreamMap.get(publishId);
+                if (null == out) {
+                    continue;
+                }
                 break;
             }
         }
