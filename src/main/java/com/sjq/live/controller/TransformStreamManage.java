@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * Created by shenjq on 2019/11/29
@@ -108,11 +107,11 @@ public class TransformStreamManage {
 
         //注册管道流
         PipedOutputStream outPipe = new PipedOutputStream();
-        PipedInputStream inPipe = new PipedInputStream(1024*1024);
+        PipedInputStream inPipe = new PipedInputStream(1024*1024*1024);
         outPipe.connect(inPipe);
         outStreamMap.put(publishId, outPipe);
         //从管道中读取数据
-        byte[] bytes = new byte[1024];
+        byte[] bytes = new byte[1024*1024];
         int len;
         while ((len = inPipe.read(bytes)) != -1) {
             out.write(bytes, 0, len);
@@ -229,7 +228,7 @@ public class TransformStreamManage {
             int leftTagDataToRead = 0;
 
             boolean sendTagHeader = false;
-            byte[] bytes = new byte[1024];
+            byte[] bytes = new byte[1024*10];
             int len;
             try {
                 while ((len = in.read(bytes)) != -1) {
