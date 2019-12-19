@@ -1,0 +1,34 @@
+/** 浮动 **/
+.float-left{
+    float: left;
+}
+.clear-both{
+    clear: both;
+}
+/** 居中 **/
+.center-parent{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.center-item{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+/** 高度和宽度相等 **/
+.square-box{
+    position:relative;
+}
+.square-box::before{
+    content: "";
+    padding-top: 100%;
+    display: block;
+}
+/** 100%大小 **/
+.size-100-absolute{
+    position:absolute;
+    width: 100%;
+    height: 100%;
+}
