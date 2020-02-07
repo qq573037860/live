@@ -54,11 +54,11 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
         Map<String, Object> map = session.getAttributes();
         //向管道中写入数据
         TransformStreamManage.StreamWriteHandler writeHandler = (TransformStreamManage.StreamWriteHandler)map.get("streamHandler");
-        if (message.isLast()) {
+        //if (message.isLast()) {
             writeHandler.writeWithFlush(message.getPayload().array());
-        } else {
+        /*} else {
             writeHandler.write(message.getPayload().array());
-        }
+        }*/
     }
 
     @Override

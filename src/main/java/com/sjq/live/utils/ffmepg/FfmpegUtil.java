@@ -54,6 +54,10 @@ public class FfmpegUtil {
 		command.add("libx264");
 		command.add("-acodec");
 		command.add("aac");
+		command.add("-crf");
+		command.add("28");
+		command.add("-preset");
+		command.add("ultrafast");
 		command.add("-f");
 		command.add("flv");
 		command.add(dstUrl);

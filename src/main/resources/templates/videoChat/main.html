@@ -4,46 +4,48 @@
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <title>小小聊天室</title>
 
-    <link rel="stylesheet" type="text/css" href="/static/css/common.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/utils.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/css/common.css" />
+    <link rel="stylesheet" type="text/css" href="/css/utils.css" />
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
 
-    <script src="/static/js/utils/DomSelector.js"></script>
-    <script src="/static/js/videoStreamPublish/VideoDataRecorder.js"></script>
-    <script src="/static/js/videoStreamPublish/VideoStreamHandler.js"></script>
-    <script src="/static/js/videoStreamSubscribe/flv.js"></script>
-    <script src="/static/js/videoStreamSubscribe/VideoLive.js"></script>
-    <script src="/static/js/videoChat/main.js"></script>
+    <!--<script src="/js/utils/DomSelector.js"></script>-->
+    <script src="/js/videoStreamPublish/VideoDataRecorder.js"></script>
+    <script src="/js/videoStreamPublish/VideoStreamHandler.js"></script>
+    <script src="/js/videoStreamSubscribe/flv.js"></script>
+    <script src="/js/videoStreamSubscribe/VideoLive.js"></script>
+    <script src="/js/videoChat/main.js"></script>
 </head>
 <body>
 <div class="center-parent">
     <div class="center-item" id="identifyWindow">
-        <p>请输入您的ID</p>
-        <input type="text" style="width: 300px;height: 45px;" />
-        <a>确认</a>
+        <p class="text-align-center">请输入您的ID</p>
+        <input id="publish_id" type="text" style="width: 300px;height: 45px;" />
+        <a id="publish_id_confirm">确认</a>
     </div>
 
-    <!-- 用户自己的video -->
-    <div class="publish-video-box square-box float-left" style="width: 30%;" >
-        <video class="size-100-absolute" controls autoplay></video>
-    </div>
+    <div id="video-area" class="display-none">
+        <!-- 用户自己的video -->
+        <div class="publish-video-box square-box float-left" style="width: 30%;" >
+            <video id="myVideo" class="size-100-absolute" controls autoplay></video>
+        </div>
 
-
-    <!-- 用户聊天对象的video（最多5个） -->
-    <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
-        <video class="size-100-absolute" style="display: none;" controls autoplay></video>
-    </div>
-    <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
-        <video class="size-100-absolute" style="display: none;" controls autoplay></video>
-    </div>
-    <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
-        <video class="size-100-absolute" style="display: none;" controls autoplay></video>
-    </div>
-    <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
-        <video class="size-100-absolute" style="display: none;" controls autoplay></video>
-    </div>
-    <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
-        <video class="size-100-absolute" style="display: none;" controls autoplay></video>
+        <!-- 用户聊天对象的video（最多5个） -->
+        <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
+            <input id="subscribe_id" type="text" /><a id="subscribe_id_confirm">订阅</a>
+            <video id="subscribeVideo" class="size-100-absolute" style="" controls autoplay></video>
+        </div>
+        <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
+            <video class="size-100-absolute" style="display: none;" controls autoplay></video>
+        </div>
+        <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
+            <video class="size-100-absolute" style="display: none;" controls autoplay></video>
+        </div>
+        <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
+            <video class="size-100-absolute" style="display: none;" controls autoplay></video>
+        </div>
+        <div class="subscribe-video-box square-box float-left" style="width: 30%;" >
+            <video class="size-100-absolute" style="display: none;" controls autoplay></video>
+        </div>
     </div>
 </div>
 </body>

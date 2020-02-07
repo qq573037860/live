@@ -48,8 +48,8 @@ public class TransformStreamManage {
         //开启ffmpeg视频流转换进程，会在originStream读取原始数据，然后将转换后的数据发到transformedStream中
         Process process = null;
         try {
-            process = FfmpegUtil.convertStream("http://" + serverIp + ":" + serverPort + "/originStream?publishId=" + publishId,
-                    "http://" + serverIp + ":" + serverPort + "/transformedStream?publishId=" + publishId);
+            process = FfmpegUtil.convertStream("https://" + serverIp + ":" + serverPort + "/originStream?publishId=" + publishId,
+                    "https://" + serverIp + ":" + serverPort + "/transformedStream?publishId=" + publishId);
         } catch (FFmpegException e) {
             logger.error("开启ffmpeg视频流转换进程失败", e);
             return null;
@@ -104,14 +104,13 @@ public class TransformStreamManage {
     @RequestMapping("/originStream")
     public void originStream(HttpServletResponse response, String publishId) throws Exception {
         ServletOutputStream out = response.getOutputStream();
-
         //注册管道流
         PipedOutputStream outPipe = new PipedOutputStream();
         PipedInputStream inPipe = new PipedInputStream(1024*1024*1024);
         outPipe.connect(inPipe);
         outStreamMap.put(publishId, outPipe);
         //从管道中读取数据
-        byte[] bytes = new byte[1024*1024];
+        byte[] bytes = new byte[1024*16];
         int len;
         while ((len = inPipe.read(bytes)) != -1) {
             out.write(bytes, 0, len);

@@ -19,7 +19,7 @@
             return ws;
         },
         _init : function () {
-            this.pushUrl = "ws://" + win.location.host + ":" + win.location.port + "/ws/pushStream?"
+            this.pushUrl = "wss://" + win.location.host + "/ws/pushStream?"
         },
         _pushStream : function (publishId, onOpenCallBack) {
             const url = this.pushUrl + "publishId=" + publishId;

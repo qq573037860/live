@@ -17,6 +17,9 @@
     left: 50%;
     transform: translate(-50%,-50%);
 }
+.text-align-center{
+    text-align: center;
+}
 /** 高度和宽度相等 **/
 .square-box{
     position:relative;
@@ -31,4 +34,11 @@
     position:absolute;
     width: 100%;
     height: 100%;
+}
+/** 显隐 **/
+.display-block{
+    display: block;
+}
+.display-none{
+    display: none;
 }
