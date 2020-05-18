@@ -25,8 +25,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry
-                .addHandler(origin, "ws/pushStream")
+        registry.addHandler(origin, "ws/pushStream")
                 .addHandler(live, "ws/receiveStream")
                 .addInterceptors(interceptor)
                 .setAllowedOrigins("*");
