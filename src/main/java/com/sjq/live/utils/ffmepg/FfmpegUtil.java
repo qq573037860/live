@@ -48,10 +48,22 @@ public class FfmpegUtil {
 	private static List<String> getConvertToFlvStreamCommand(String srcUrl, String dstUrl) {
 		List<String> command = new ArrayList();
 		command.add(ffmpegPath +"\\ffmpeg");
+
+		command.add("-hwaccel");
+		command.add("cuvid");
+
 		command.add("-i");
 		command.add(srcUrl);
+
+		command.add("-tune");
+		command.add("zerolatency");
+
+		command.add("-threads");
+		command.add("2");
+
 		command.add("-c:v");
 		command.add("libx264");
+
 		command.add("-acodec");
 		command.add("aac");
 		command.add("-crf");

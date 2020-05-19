@@ -1,6 +1,7 @@
 package com.sjq.live.controller;
 
 import com.sjq.live.constant.SubscribeEnum;
+import com.sjq.live.service.OutputStreamProcessor;
 import com.sjq.live.utils.FlvUtils;
 import com.sjq.live.utils.ffmepg.FFmpegException;
 import com.sjq.live.utils.ffmepg.FfmpegUtil;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -33,7 +33,7 @@ public class TransformStreamManage {
     @Value("${server.extranet}")
     private String serverIp;
 
-    private Map<String, PipedOutputStream> outStreamMap = new ConcurrentHashMap<>();
+    private Map<String, OutputStreamProcessor> outStreamMap = new ConcurrentHashMap<>();
     private Map<String, StreamReadTask> taskMap = new ConcurrentHashMap<>();
 
     private void removeMap(String publishId) {
@@ -54,8 +54,8 @@ public class TransformStreamManage {
             logger.error("开启ffmpeg视频流转换进程失败", e);
             return null;
         }
-        //寻找写入管道流
-        PipedOutputStream out = null;
+        //寻找输出流处理器
+        OutputStreamProcessor out = null;
         for (;;) {
             if (null == out) {
                 out = outStreamMap.get(publishId);;
@@ -103,21 +103,12 @@ public class TransformStreamManage {
      */
     @RequestMapping("/originStream")
     public void originStream(HttpServletResponse response, String publishId) throws Exception {
-        ServletOutputStream out = response.getOutputStream();
         //注册管道流
-        PipedOutputStream outPipe = new PipedOutputStream();
-        PipedInputStream inPipe = new PipedInputStream(1024*1024*1024);
-        outPipe.connect(inPipe);
-        outStreamMap.put(publishId, outPipe);
+        OutputStreamProcessor streamProcessor = OutputStreamProcessor.getBuilder()
+                .outputStream(response.getOutputStream()).build();
+        outStreamMap.put(publishId, streamProcessor);
         //从管道中读取数据
-        byte[] bytes = new byte[1024*16];
-        int len;
-        while ((len = inPipe.read(bytes)) != -1) {
-            out.write(bytes, 0, len);
-            out.flush();
-        }
-        inPipe.close();
-        out.close();
+        streamProcessor.waitingForData();
         logger.info("publishId:{}, originStream流关闭", publishId);
     }
 
@@ -144,11 +135,11 @@ public class TransformStreamManage {
 
     public class StreamWriteHandler{
 
-        private PipedOutputStream out;
+        private OutputStreamProcessor out;
         private Process process;
         private String publishId;
 
-        StreamWriteHandler(PipedOutputStream out, Process process, String publishId) {
+        StreamWriteHandler(OutputStreamProcessor out, Process process, String publishId) {
             this.out = out;
             this.process = process;
             this.publishId = publishId;
@@ -163,20 +154,10 @@ public class TransformStreamManage {
 
         }
 
-        public void writeWithFlush(byte[] bytes) {
-            write(bytes);
-            try {
-                out.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
         public void close() {
             process.destroyForcibly();
             try {
-                out.close();
+                out.writeToEnd();
             } catch (IOException e) {
                 e.printStackTrace();
             }

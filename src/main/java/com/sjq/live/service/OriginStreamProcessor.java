@@ -55,7 +55,7 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
         //向管道中写入数据
         TransformStreamManage.StreamWriteHandler writeHandler = (TransformStreamManage.StreamWriteHandler)map.get("streamHandler");
         //if (message.isLast()) {
-            writeHandler.writeWithFlush(message.getPayload().array());
+            writeHandler.write(message.getPayload().array());
         /*} else {
             writeHandler.write(message.getPayload().array());
         }*/
