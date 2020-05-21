@@ -37,19 +37,13 @@ public class TransformStreamManage {
     private Map<String, OutputStreamProcessor> outStreamMap = new ConcurrentHashMap<>();
     private Map<String, DistributeStreamProcessor> distributeStreamMap = new ConcurrentHashMap<>();
 
-    public StreamWriteHandler publish(String publishId) {
+    public StreamWriteHandler publish(String publishId) throws FFmpegException {
         /*if (!outStreamMap.containsKey(publishId)) {//同一个流，只允许发布一次
             return null;
         }*/
         //开启ffmpeg视频流转换进程，会在originStream读取原始数据，然后将转换后的数据发到transformedStream中
-        Process process = null;
-        try {
-            process = FfmpegUtil.convertStream("https://" + serverIp + ":" + serverPort + "/originStream?publishId=" + publishId,
+        final Process process = FfmpegUtil.convertStream("https://" + serverIp + ":" + serverPort + "/originStream?publishId=" + publishId,
                     "https://" + serverIp + ":" + serverPort + "/transformedStream?publishId=" + publishId);
-        } catch (FFmpegException e) {
-            logger.error("开启ffmpeg视频流转换进程失败", e);
-            return null;
-        }
 
         //寻找输出流处理器
         OutputStreamProcessor out = null;
@@ -63,9 +57,8 @@ public class TransformStreamManage {
         }
 
         //返回写入流句柄
-        Process finalProcess = process;
         return new StreamWriteHandler(out, o -> {
-            finalProcess.destroyForcibly();
+            process.destroyForcibly();
             outStreamMap.remove(publishId);
             distributeStreamMap.remove(publishId);
             return null;

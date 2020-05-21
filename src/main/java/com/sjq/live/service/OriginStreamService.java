@@ -22,7 +22,6 @@ public class OriginStreamService extends TextWebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(OriginStreamService.class);
 
-
     @Autowired
     private TransformStreamManage manage;
 
@@ -49,14 +48,9 @@ public class OriginStreamService extends TextWebSocketHandler {
      */
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        Map<String, Object> map = session.getAttributes();
         //向管道中写入数据
-        StreamWriteHandler writeHandler = (StreamWriteHandler)map.get("streamHandler");
-        //if (message.isLast()) {
-            writeHandler.write(message.getPayload().array());
-        /*} else {
-            writeHandler.write(message.getPayload().array());
-        }*/
+        StreamWriteHandler writeHandler = (StreamWriteHandler)session.getAttributes().get("streamHandler");
+        writeHandler.write(message.getPayload().array());
     }
 
     @Override
