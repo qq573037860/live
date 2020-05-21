@@ -1,3 +1,6 @@
+/**
+ * 忽略
+ */
 (function(win, doc){
 
     function $ds(val) {
