@@ -2,7 +2,7 @@ package com.sjq.live.service;
 
 import com.sjq.live.constant.SubscribeEnum;
 import com.sjq.live.controller.TransformStreamManage;
-import com.sjq.live.controller.TransformStreamManage.ReadHandler;
+import com.sjq.live.support.AbstractLiveStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +20,9 @@ import java.util.Map;
  */
 
 @Component
-public class LiveStreamProcessor extends TextWebSocketHandler {
+public class LiveStreamService extends TextWebSocketHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(LiveStreamProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(LiveStreamService.class);
 
     @Autowired
     private TransformStreamManage manage;
@@ -34,7 +34,7 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
         String subscribeId = map.get("subscribeId").toString();
 
         if (null == map.get("registerId")) {//不能重复订阅
-            SubscribeEnum subscribeEnum = manage.subscribe(subscribeId, new ReadHandlerImpl(session));
+            SubscribeEnum subscribeEnum = manage.subscribe(subscribeId, new LiveStreamHandler(session));
             if (0 == subscribeEnum.getCode()) {
                 map.put("registerId", subscribeEnum.getName());
             }
@@ -55,16 +55,16 @@ public class LiveStreamProcessor extends TextWebSocketHandler {
         logger.info("client onclose：" + session.toString());
     }
 
-    class ReadHandlerImpl extends ReadHandler {
+    class LiveStreamHandler extends AbstractLiveStreamHandler {
 
         private WebSocketSession session;
 
-        ReadHandlerImpl(WebSocketSession session) {
+        LiveStreamHandler(WebSocketSession session) {
             this.session = session;
         }
 
         @Override
-        public void read(byte[] bytes) {
+        public void onData(byte[] bytes) {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(new BinaryMessage(bytes, true));

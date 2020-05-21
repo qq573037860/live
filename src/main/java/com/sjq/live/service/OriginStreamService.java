@@ -10,9 +10,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -20,9 +17,9 @@ import java.util.Map;
  */
 
 @Component
-public class OriginStreamProcessor extends TextWebSocketHandler {
+public class OriginStreamService extends TextWebSocketHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(OriginStreamProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(OriginStreamService.class);
 
 
     @Autowired
@@ -53,7 +50,7 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         Map<String, Object> map = session.getAttributes();
         //向管道中写入数据
-        TransformStreamManage.StreamWriteHandler writeHandler = (TransformStreamManage.StreamWriteHandler)map.get("streamHandler");
+        StreamWriteHandler writeHandler = (StreamWriteHandler)map.get("streamHandler");
         //if (message.isLast()) {
             writeHandler.write(message.getPayload().array());
         /*} else {
@@ -64,7 +61,7 @@ public class OriginStreamProcessor extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         //关闭管道
-        TransformStreamManage.StreamWriteHandler handler = (TransformStreamManage.StreamWriteHandler) session.getAttributes().get("streamHandler");
+        StreamWriteHandler handler = (StreamWriteHandler) session.getAttributes().get("streamHandler");
         if (null != handler) {
             handler.close();
         }

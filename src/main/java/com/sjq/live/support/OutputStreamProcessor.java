@@ -1,12 +1,10 @@
-package com.sjq.live.service;
+package com.sjq.live.support;
 
-import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class OutputStreamProcessor {
+public abstract class OutputStreamProcessor {
 
-    private ServletOutputStream outputStream;
     private final ConcurrentLinkedQueue<byte[]> queue = new ConcurrentLinkedQueue();
 
     //private static Disruptor<ByteEvent> disruptor;
@@ -57,18 +55,11 @@ public class OutputStreamProcessor {
         }
     }*/
 
-    private OutputStreamProcessor(ServletOutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
-
-    public static Builder getBuilder(){return new Builder();}
-
-    public void write(byte[] bytes) throws IOException {
+    public void write(byte[] bytes) {
         queue.add(bytes);
     }
 
-
-    public void writeToEnd() throws IOException {
+    public void close() {
         write(new byte[]{});
     }
 
@@ -80,26 +71,16 @@ public class OutputStreamProcessor {
             } else if (bytes.length == 0) {
                 break;
             }
-            outputStream.write(bytes);
-            outputStream.flush();
+            writeToStream(bytes);
+            flushStream();
         }
-        outputStream.close();
+        closeStream();
     }
 
-    public static class Builder {
+    protected abstract void writeToStream(byte[] bytes) throws IOException;
 
-        private ServletOutputStream outputStream;
+    protected abstract void flushStream() throws IOException;
 
-        private Builder(){}
-
-        public Builder outputStream(ServletOutputStream outputStream) {
-            this.outputStream = outputStream;
-            return this;
-        }
-
-        public OutputStreamProcessor build() {
-            return new OutputStreamProcessor(this.outputStream);
-        }
-    }
+    protected abstract void closeStream() throws IOException;
 
 }

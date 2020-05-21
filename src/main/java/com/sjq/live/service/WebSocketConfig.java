@@ -17,11 +17,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired
     private WebSocketInterceptor interceptor;
-
     @Autowired
-    private OriginStreamProcessor origin;
+    private OriginStreamService origin;
     @Autowired
-    private LiveStreamProcessor live;
+    private LiveStreamService live;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {

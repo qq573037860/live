@@ -8,6 +8,9 @@ public class FlvUtils {
     //保存前一个tag的大小
     private static final int PREVIOUS_TAG_SIZE = 4;
 
+    public static final int FLV_HEADER_SIZE = 13;
+    public static final int TAG_HEADER_SIZE = 11;
+
     /**
      * 获取tag的时间戳
      * @param tagHeader
