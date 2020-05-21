@@ -221,8 +221,6 @@ public class FfmpegUtil {
 		}
 	}
 
-//"D:\Program Files\FFmpeg\bin\ffmpeg.exe" -y -i %1 -vcodec libvpx -quality good -cpu-used 5 -b:v 700k -maxrate 700k -bufsize 1000k -qmin 10 -qmax 42 -vf scale=trunc(oh*a/2)*2:480 -threads 4 -acodec libvorbis -f webm %1.webm
-		 
 	class PrintStream extends Thread{
 		java.io.InputStream __is =null;
 		 

@@ -1,6 +1,4 @@
-package com.sjq.live.service;
-
-import com.sjq.live.support.OutputStreamProcessor;
+package com.sjq.live.support;
 
 import java.util.function.Function;
 

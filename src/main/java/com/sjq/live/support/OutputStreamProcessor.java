@@ -8,8 +8,7 @@ public abstract class OutputStreamProcessor {
     private final ConcurrentLinkedQueue<byte[]> queue = new ConcurrentLinkedQueue();
 
     //private static Disruptor<ByteEvent> disruptor;
-
-    static {
+    //static {
         /*// Specify the size of the ring buffer, must be power of 2.
         int bufferSize = 1024;
 
@@ -26,7 +25,7 @@ public abstract class OutputStreamProcessor {
         RingBuffer<ByteEvent> ringBuffer = disruptor.getRingBuffer();
 
         ringBuffer.publishEvent((event, sequence, buffer) -> event.setBytes(buffer), "1,2,3".getBytes());*/
-    }
+    //}
     /*public static class ByteEvent{
         private byte[] bytes;
 
@@ -38,7 +37,6 @@ public abstract class OutputStreamProcessor {
             this.bytes = bytes;
         }
     }
-
 
     public  static class LongEventFactory implements EventFactory<ByteEvent> {
         @Override

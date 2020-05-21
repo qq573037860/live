@@ -1,7 +1,7 @@
 package com.sjq.live.controller;
 
 import com.sjq.live.constant.SubscribeEnum;
-import com.sjq.live.service.StreamWriteHandler;
+import com.sjq.live.support.StreamWriteHandler;
 import com.sjq.live.support.*;
 import com.sjq.live.utils.ffmepg.FFmpegException;
 import com.sjq.live.utils.ffmepg.FfmpegUtil;
@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletInputStream;
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by shenjq on 2019/11/29
- * 对外提供的流接口
+ * 直播流转换接口
  */
 
 @Controller
@@ -78,8 +79,8 @@ public class TransformStreamManage {
      * @return
      */
     public SubscribeEnum subscribe(String subscribeId, AbstractLiveStreamHandler handler) {
-        if (null == handler) {
-            return SubscribeEnum.READ_HANDLER_IS_NULL;
+        if (StringUtils.isEmpty(subscribeId) || null == handler) {
+            throw new IllegalArgumentException("参数不能为空");
         }
 
         DistributeStreamProcessor task = distributeStreamMap.get(subscribeId);
@@ -93,7 +94,7 @@ public class TransformStreamManage {
     }
 
     /**
-     * 去掉订阅直播
+     * 取消订阅直播
      * @param subscribeId
      * @param id
      */
@@ -112,7 +113,7 @@ public class TransformStreamManage {
     }
 
     /**
-     * 原始流
+     * 原始流(供ffmpeg调用)
      * @param response
      * @throws Exception
      */
@@ -127,7 +128,7 @@ public class TransformStreamManage {
     }
 
     /**
-     * 经ffmpeg转换后的流
+     * 经ffmpeg转换后的流(供ffmpeg调用)
      * @param request
      * @throws Exception
      */
