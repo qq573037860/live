@@ -14,12 +14,19 @@
                 isLive : true,
                 withCredentials : false,
                 hasAudio : true,
-                hasVideo : true
+                hasVideo : true,
+                duration: 0
             },
             optionalConfig : {
-                enableWorker: true,
-                lazyLoadMaxDuration: 3 * 60,
-                seekType: 'range'
+                /*enableWorker: true,*/
+                /*seekType: 'range',*/
+                enableStashBuffer: false,
+                isLive: true,
+                lazyLoad: false,
+                lazyLoadMaxDuration: 0,
+                lazyLoadRecoverDuration: 0,
+                deferLoadAfterSourceOpen: false,
+                fixAudioTimestampGap: false
             },
             recordJson : {}
         },
@@ -40,6 +47,20 @@
                 "player" : player,
                 "videoDom" : videoDom
             };
+
+            player.play();
+
+            //避免时间长时间积累缓冲导致延迟越来越高
+            setInterval(() => {
+                if (!player.buffered.length) {
+                    return;
+                }
+                let end = player.buffered.end(0);
+                let diff = end - player.currentTime;
+                if (diff >= 1.5) {
+                    player.currentTime = end - 0.1;
+                }
+            }, 3 * 10 * 1000);
         },
         _destoryPlayer : function(player) {
             player.pause();

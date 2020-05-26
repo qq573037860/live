@@ -8,15 +8,8 @@
     VideoDataRecorder.prototype = {
         _defaultParam : {
             record : {
-                audio: {
-                    sampleRate: 160,
-                    channelCount: 1,
-                    noiseSuppression: true
-                },
-                video:{
-                    frameRate: { ideal: 10, max: 15 },
-                    sampleRate: 350
-                }
+                audio: true,
+                video:{width:480,height:320}
             },
             videoDom : null,
             URL : window.URL || window.webkitURL,

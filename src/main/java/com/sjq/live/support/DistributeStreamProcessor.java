@@ -8,6 +8,7 @@ public class DistributeStreamProcessor {
 
     private ServletInputStreamProcessor inputStreamProcessor;
     private ConcurrentLinkedQueue<AbstractLiveStreamHandler> subscribes = new ConcurrentLinkedQueue();
+    private byte[] headerData;
 
     public DistributeStreamProcessor(ServletInputStreamProcessor inputStreamProcessor) {
         this.inputStreamProcessor = inputStreamProcessor;
@@ -20,10 +21,13 @@ public class DistributeStreamProcessor {
             subscribes.parallelStream().forEach(abstractLiveStreamHandler -> {
                 abstractLiveStreamHandler.send(tagData, flvHeaderData, isTagHeaderStart);
             });
+        }, datas -> {
+            headerData = datas;
         });
     }
 
     public void addSubscribe(AbstractLiveStreamHandler handler) {
+        handler.send(headerData);
         this.subscribes.add(handler);
     }
 

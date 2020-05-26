@@ -1,4 +1,3 @@
-
 let publishJson = {};
 function publish(publishId) {
     if (!publishJson[publishId]) {

@@ -16,7 +16,7 @@ public class FlvStreamParserUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(FlvStreamParserUtil.class);
 
-    private static final int BUFFER_SIZE = 1024*10;
+    private static final int BUFFER_SIZE = 1024*1024;
 
     private static byte[] readHeader(InputStreamProcessor in) {
         byte[] flvHeader = new byte[FlvUtils.FLV_HEADER_SIZE];
@@ -28,7 +28,7 @@ public class FlvStreamParserUtil {
         return flvHeader;
     }
 
-    public static void parseStream(InputStreamProcessor in, DataCallBack dataCallBack) {
+    public static void parseStream(InputStreamProcessor in, DataCallBack dataCallBack, HeaderDataCallBack headerDataCallBack) {
         Assert.notNull(in, "InputStreamProcessor不能为空");
         Assert.notNull(dataCallBack, "Function不能为空");
 
@@ -80,6 +80,7 @@ public class FlvStreamParserUtil {
                                 if (timeStamp > 0) {
                                     startReadKeyFrameTag = false;
                                     headerData = headerDataOutStream.toByteArray();
+                                    headerDataCallBack.onData(headerData);
                                     headerDataOutStream.close();
                                     headerDataOutStream = null;
                                 }
@@ -140,6 +141,13 @@ public class FlvStreamParserUtil {
      * 数据回调
      */
     public interface DataCallBack {
-        void onData(byte[] tagData, byte[] flvHeaderData, boolean isTagHeaderStart);
+        void onData(byte[] bytes, byte[] flvHeaderData, boolean isTagHeaderStart);
+    }
+
+    /**
+     *  flvHeader + keyFrames
+     */
+    public interface HeaderDataCallBack {
+        void onData(byte[] bytes);
     }
 }
