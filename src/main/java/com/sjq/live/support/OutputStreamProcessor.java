@@ -1,11 +1,12 @@
 package com.sjq.live.support;
 
+import com.sjq.live.utils.Queue;
+
 import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class OutputStreamProcessor {
 
-    private final ConcurrentLinkedQueue<byte[]> queue = new ConcurrentLinkedQueue();
+    private final Queue<byte[]> queue = new Queue(1000);
 
     //private static Disruptor<ByteEvent> disruptor;
     //static {
@@ -54,7 +55,7 @@ public abstract class OutputStreamProcessor {
     }*/
 
     public void write(byte[] bytes) {
-        queue.add(bytes);
+        queue.offer(bytes);
     }
 
     public void close() {
