@@ -10,7 +10,7 @@ public class Queue<T> {
 
     public static void main(String[] args) {
         //ConcurrentQueue<byte[]> queue = new ConcurrentQueue<>(100);
-        Queue<Integer> queue = new Queue(1000);
+        /*Queue<Integer> queue = new Queue(1000);
         long st = System.currentTimeMillis();
         Thread p = new Thread(() -> {
             for (int i = 0; i < 1000; i++) {
@@ -38,7 +38,8 @@ public class Queue<T> {
             e.printStackTrace();
         }
 
-        System.out.println("耗时:" + (System.currentTimeMillis() - st));
+        System.out.println("耗时:" + (System.currentTimeMillis() - st));*/
+        System.out.println(MIN_PARKTIME_NS<<4);
     }
 
     final Object[] array;
@@ -49,7 +50,7 @@ public class Queue<T> {
     final long[] als = new long[11];
 
     private static final int MIN_PARKTIME_NS = 10;
-    private static final int MAX_PACKTIME_NS = 100;
+    private static final int MAX_PACKTIME_NS = 160;
 
     public Queue(int preferCapacity) {
         double pow = log2(Double.valueOf(preferCapacity));
@@ -87,5 +88,4 @@ public class Queue<T> {
         }
         return (T) r;
     }
-
 }
