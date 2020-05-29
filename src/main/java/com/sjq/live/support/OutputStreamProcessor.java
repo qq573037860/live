@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public abstract class OutputStreamProcessor {
 
-    private final Queue<byte[]> queue = new Queue(1000);
+    private final Queue<byte[]> queue = new Queue(10000);
 
     //private static Disruptor<ByteEvent> disruptor;
     //static {

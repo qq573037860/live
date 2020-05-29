@@ -39,7 +39,6 @@ public class Queue<T> {
         }
 
         System.out.println("耗时:" + (System.currentTimeMillis() - st));*/
-        System.out.println(MIN_PARKTIME_NS<<4);
     }
 
     final Object[] array;
