@@ -18,12 +18,18 @@ import java.util.Map;
  */
 
 @Component
-public class OriginStreamService extends TextWebSocketHandler {
+public class PublishVideoStreamService extends AbstractBinaryWebSocketHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(OriginStreamService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublishVideoStreamService.class);
+
+    private static final String path = "ws/publishVideoStream";
 
     @Autowired
     private TransformStreamManage manage;
+
+    public PublishVideoStreamService() {
+        super(path);
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {

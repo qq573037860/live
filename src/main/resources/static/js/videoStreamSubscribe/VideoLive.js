@@ -31,7 +31,7 @@
             recordJson : {}
         },
         _init : function(options) {
-            this._defaultParam.pushUrl = "wss://" + win.location.host + "/ws/receiveStream?"
+            this._defaultParam.pushUrl = "wss://" + win.location.host + "/ws/subscribeVideoStream?"
         },
         _live : function(subscribeId, videoDom) {
 

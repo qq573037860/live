@@ -50,10 +50,10 @@ public class ConcurrentQueue<T> {
     private final byte[] falseOffer;   //新增
     private final byte[] falsePoll;  //新增
     private final AtomicReferenceArray<T> array;
-    final int capacity;
-    final int m;
-    AtomicLong tail;
-    AtomicLong head;
+    private final int capacity;
+    private final int m;
+    private final AtomicLong tail;
+    private final AtomicLong head;
     private final AtomicLong[] als = new AtomicLong[11];
 
     private static final int INTERNAL_PACK_COUNT = 100;

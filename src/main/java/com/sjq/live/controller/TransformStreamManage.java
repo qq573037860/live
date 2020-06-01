@@ -116,7 +116,7 @@ public class TransformStreamManage {
         OutputStreamProcessor streamProcessor = new ServletOutputStreamProcessor(response.getOutputStream());
         outStreamMap.put(publishId, streamProcessor);
         //从管道中读取数据
-        streamProcessor.waitingForData();
+        streamProcessor.processingData();
         logger.info("publishId:{}, originStream流关闭", publishId);
     }
 

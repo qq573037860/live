@@ -62,7 +62,7 @@ public abstract class OutputStreamProcessor {
         write(new byte[]{});
     }
 
-    public void waitingForData() throws IOException {
+    public void processingData() throws IOException {
         for (;;) {
             byte[] bytes = queue.poll();
             if (null == bytes) {

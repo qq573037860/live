@@ -20,12 +20,18 @@ import java.util.Map;
  */
 
 @Component
-public class LiveStreamService extends TextWebSocketHandler {
+public class SubscribeVideoStreamService extends AbstractBinaryWebSocketHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(LiveStreamService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SubscribeVideoStreamService.class);
+
+    private static final String path = "ws/subscribeVideoStream";
 
     @Autowired
     private TransformStreamManage manage;
+
+    public SubscribeVideoStreamService() {
+        super(path);
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {

@@ -5,8 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistration;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Created by shenjq on 2019/12/2
@@ -16,25 +22,27 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired
-    private WebSocketInterceptor interceptor;
+    private Optional<List<AbstractBinaryWebSocketHandler>> webSocketHandlers;
     @Autowired
-    private OriginStreamService origin;
-    @Autowired
-    private LiveStreamService live;
+    private List<WebSocketInterceptor> webSocketInterceptors;
+
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(origin, "ws/pushStream")
-                .addHandler(live, "ws/receiveStream")
-                .addInterceptors(interceptor)
-                .setAllowedOrigins("*");
+        webSocketHandlers.ifPresent(webSocketHandlers -> {
+            webSocketHandlers.forEach(webSocketHandler -> {
+                registry.addHandler(webSocketHandler, webSocketHandler.getPaths())
+                        .addInterceptors(webSocketInterceptors.toArray(new WebSocketInterceptor[webSocketInterceptors.size()]))
+                        .setAllowedOrigins("*");
+            });
+        });
     }
 
     @Bean
     public ServletServerContainerFactoryBean createWebSocketContainer() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        container.setMaxTextMessageBufferSize(1024*10*5);
-        container.setMaxBinaryMessageBufferSize(1024*10*5);
+        container.setMaxTextMessageBufferSize(1024*10);
+        container.setMaxBinaryMessageBufferSize(1024*15);
         return container;
     }
 }
