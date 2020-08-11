@@ -1,15 +1,13 @@
 package com.sjq.live.support;
 
-import java.util.function.Function;
-
 public class StreamWriteHandler {
 
     private OutputStreamProcessor out;
-    private Function closeCallBack;
+    private StreamCloseCallBack closeCallBack;
 
-    public StreamWriteHandler(OutputStreamProcessor out, Function closeCallBack) {
+    public StreamWriteHandler(OutputStreamProcessor out, StreamCloseCallBack callBack) {
         this.out = out;
-        this.closeCallBack = closeCallBack;
+        this.closeCallBack = callBack;
     }
 
     public void write(byte[] bytes) {
@@ -17,8 +15,14 @@ public class StreamWriteHandler {
     }
 
     public void close() {
-        closeCallBack.apply(null);
         out.close();
+        closeCallBack.onClose();
     }
 
+    /**
+     * stream关闭回调方法
+     */
+    public interface StreamCloseCallBack {
+        void onClose();
+    }
 }

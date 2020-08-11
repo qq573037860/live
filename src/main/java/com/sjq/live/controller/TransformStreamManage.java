@@ -57,11 +57,10 @@ public class TransformStreamManage {
         }
 
         //返回写入流句柄
-        return new StreamWriteHandler(out, o -> {
+        return new StreamWriteHandler(out, () -> {
             process.destroyForcibly();
             outStreamMap.remove(publishId);
             distributeStreamMap.remove(publishId);
-            return null;
         });
     }
 

@@ -1,7 +1,7 @@
 package com.sjq.live.constant;
 
 public enum SubscribeEnum {
-    SUCCESS("", 0),//name:对应订阅id
+    SUCCESS("存放订阅id", 0),
     NO_PUBLISHER("没有发布者", 1),
     SUBSCRIBED("已经订阅成过了", 2),
     ;

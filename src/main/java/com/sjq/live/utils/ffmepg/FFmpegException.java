@@ -1,8 +1,7 @@
 package com.sjq.live.utils.ffmepg;
 
-public class FFmpegException extends Exception{
-	private static final long serialVersionUID= 1L;
-	 
+public class FFmpegException extends Exception {
+
 	public FFmpegException() {
 	super();
 	}

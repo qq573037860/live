@@ -70,8 +70,8 @@ public class Queue<T> {
 
     volatile Boolean lock = false;*/
 
-    private static final int MIN_PARKTIME_NS = 10;
-    private static final int MAX_PACKTIME_NS = 160;
+    private static final int MIN_PARK_TIME_NS = 10;
+    private static final int MAX_PARK_TIME_NS = 160;
 
 
     public Queue(int preferCapacity) {
@@ -118,10 +118,10 @@ public class Queue<T> {
     public T poll() {
         int p = (int) (tail++ & this.m);
         Object r;
-        int parkTime = MIN_PARKTIME_NS;
+        int parkTime = MIN_PARK_TIME_NS;
         while((r = array[p]) == null) {
             LockSupport.parkNanos(parkTime);
-            if(parkTime < MAX_PACKTIME_NS) parkTime <<= 1;
+            if(parkTime < MAX_PARK_TIME_NS) parkTime <<= 1;
         }
         array[p] = null;
         return (T) r;
