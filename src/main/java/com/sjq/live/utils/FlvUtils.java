@@ -5,14 +5,14 @@ package com.sjq.live.utils;
  */
 public class FlvUtils {
 
+    public static final int FLV_HEADER_SIZE = 13;
+    public static final int TAG_HEADER_SIZE = 11;
     //保存前一个tag的大小
     private static final int PREVIOUS_TAG_SIZE = 4;
 
-    public static final int FLV_HEADER_SIZE = 13;
-    public static final int TAG_HEADER_SIZE = 11;
-
     /**
      * 获取tag的时间戳
+     *
      * @param tagHeader
      * @return
      */
@@ -22,6 +22,7 @@ public class FlvUtils {
 
     /**
      * 获取tagData的长度
+     *
      * @param tagHeader
      * @return
      */
@@ -30,13 +31,13 @@ public class FlvUtils {
     }
 
     public static int byteArrayToInt(byte[] b) {
-        return  (b[0] & 0xFF) << 16 |
+        return (b[0] & 0xFF) << 16 |
                 (b[1] & 0xFF) << 8 |
                 (b[2] & 0xFF);
     }
 
-    public static byte[] byteMerger(byte[] bt1, byte[] bt2){
-        byte[] bt3 = new byte[bt1.length+bt2.length];
+    public static byte[] byteMerger(byte[] bt1, byte[] bt2) {
+        byte[] bt3 = new byte[bt1.length + bt2.length];
         System.arraycopy(bt1, 0, bt3, 0, bt1.length);
         System.arraycopy(bt2, 0, bt3, bt1.length, bt2.length);
         return bt3;

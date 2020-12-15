@@ -3,10 +3,11 @@ package com.sjq.live.support;
 import com.sjq.live.utils.Queue;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public abstract class OutputStreamProcessor {
 
-    private final Queue<byte[]> queue = new Queue(10000);
+    private final Queue<byte[]> queue = new Queue<>(10000);
 
     //private static Disruptor<ByteEvent> disruptor;
     //static {
@@ -54,7 +55,7 @@ public abstract class OutputStreamProcessor {
         }
     }*/
 
-    public void write(byte[] bytes) {
+    public void write(final byte[] bytes) {
         queue.offer(bytes);
     }
 
@@ -62,10 +63,10 @@ public abstract class OutputStreamProcessor {
         write(new byte[]{});
     }
 
-    public void processingData() throws IOException {
+    public void processData() throws IOException {
         for (;;) {
             byte[] bytes = queue.poll();
-            if (null == bytes) {
+            if (Objects.isNull(bytes)) {
                 continue;
             } else if (bytes.length == 0) {
                 break;

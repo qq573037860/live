@@ -1,16 +1,19 @@
 package com.sjq.live.support;
 
 import com.sjq.live.utils.FlvStreamParserUtil;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DistributeStreamProcessor {
 
-    private ServletInputStreamProcessor inputStreamProcessor;
-    private ConcurrentLinkedQueue<AbstractLiveStreamHandler> subscribes = new ConcurrentLinkedQueue();
+    private final ServletInputStreamProcessor inputStreamProcessor;
+    private final ConcurrentLinkedQueue<AbstractLiveStreamHandler> subscribes = new ConcurrentLinkedQueue<>();
     private byte[] headerData;//头部数据: flvHeader + keyFrames
 
-    public DistributeStreamProcessor(ServletInputStreamProcessor inputStreamProcessor) {
+    public DistributeStreamProcessor(final ServletInputStreamProcessor inputStreamProcessor) {
+        Assert.notNull(inputStreamProcessor, "ServletInputStreamProcessor不能为空");
+
         this.inputStreamProcessor = inputStreamProcessor;
     }
 
@@ -27,7 +30,7 @@ public class DistributeStreamProcessor {
         });
     }
 
-    public void addSubscribe(AbstractLiveStreamHandler handler) {
+    public void addSubscribe(final AbstractLiveStreamHandler handler) {
         //先把头部数据发送出去
         handler.send(headerData);
         this.subscribes.add(handler);

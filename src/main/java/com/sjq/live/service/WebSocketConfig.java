@@ -5,13 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistration;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -32,7 +29,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         webSocketHandlers.ifPresent(webSocketHandlers -> {
             webSocketHandlers.forEach(webSocketHandler -> {
                 registry.addHandler(webSocketHandler, webSocketHandler.getPaths())
-                        .addInterceptors(webSocketInterceptors.toArray(new WebSocketInterceptor[webSocketInterceptors.size()]))
+                        .addInterceptors(webSocketInterceptors.toArray(new WebSocketInterceptor[0]))
                         .setAllowedOrigins("*");
             });
         });

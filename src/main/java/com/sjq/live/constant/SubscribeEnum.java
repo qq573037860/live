@@ -1,7 +1,8 @@
 package com.sjq.live.constant;
 
 public enum SubscribeEnum {
-    SUCCESS("存放订阅id", 0),
+    INVALID("无效订阅代码", -1),
+    SUCCESS("订阅成功", 0),
     NO_PUBLISHER("没有发布者", 1),
     SUBSCRIBED("已经订阅成过了", 2),
     ;
@@ -22,8 +23,17 @@ public enum SubscribeEnum {
         return code;
     }
 
-    public SubscribeEnum name(String name) {
-        this.name = name;
+    public SubscribeEnum code(int code) {
+        this.code = code;
         return this;
+    }
+
+    public static SubscribeEnum getByCode(final int code) {
+        for (SubscribeEnum value : values()) {
+            if (code == value.getCode()) {
+                return value;
+            }
+        }
+        return SubscribeEnum.INVALID.code(code);
     }
 }

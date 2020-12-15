@@ -16,7 +16,7 @@ public class FlvStreamParserUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(FlvStreamParserUtil.class);
 
-    private static final int BUFFER_SIZE = 1024*1024;
+    private static final int BUFFER_SIZE = 1024 * 1024;
 
     private static byte[] readHeader(InputStreamProcessor in) {
         byte[] flvHeader = new byte[FlvUtils.FLV_HEADER_SIZE];
@@ -64,14 +64,14 @@ public class FlvStreamParserUtil {
                 int tagHeaderIndex = 0;
                 //tagData读取起始位置
                 int tagDataIndex = 0;
-                for (;;) {
+                for (; ; ) {
                     //读取tagHeader
                     int tagHeaderNeedToRead;
                     if ((tagHeaderNeedToRead = tagHeader.length - tagHeaderSize) > 0) {//tagHeader未读完
                         int leftLength = len - tagHeaderIndex;
                         int tagHeaderReadLength = leftLength < tagHeaderNeedToRead ? leftLength : tagHeaderNeedToRead;
                         System.arraycopy(bytes, tagHeaderIndex, tagHeader, tagHeaderSize, tagHeaderReadLength);
-                        tagHeaderSize+=tagHeaderReadLength;
+                        tagHeaderSize += tagHeaderReadLength;
                         if (tagHeader.length == tagHeaderSize) {//读完了
                             tagDataIndex = tagHeaderIndex + tagHeaderReadLength;
                             leftTagDataToRead = FlvUtils.getTagDataSize(tagHeader);
@@ -113,17 +113,12 @@ public class FlvStreamParserUtil {
                         }
                     }
                     leftTagDataToRead -= len - tagDataIndex;
-                    if (leftTagDataToRead < 1) { // 读完了
-                        if (leftTagDataToRead < 0) { //读完data之后还有剩余的
-                            //重置读取tagHeader的参数
-                            tagHeaderIndex = len + leftTagDataToRead;
-                            tagHeaderSize = 0;
-                        } else {
-                            break;
-                        }
-                    } else {
+                    if (leftTagDataToRead >= 0) {//继续读
                         break;
                     }
+                    //读完一个tag后之后还有剩余，重置读取tagHeader的参数
+                    tagHeaderIndex = len + leftTagDataToRead;
+                    tagHeaderSize = 0;
                 }
             }
         } catch (Exception e) {
@@ -145,7 +140,7 @@ public class FlvStreamParserUtil {
     }
 
     /**
-     *  flvHeader + keyFrames
+     * flvHeader + keyFrames
      */
     public interface HeaderDataCallBack {
         void onData(byte[] bytes);

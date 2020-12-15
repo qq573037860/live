@@ -1,12 +1,13 @@
 package com.sjq.live.service;
 
+import com.sjq.live.support.WebSocketAttribute;
 import com.sjq.live.utils.HttpUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
@@ -22,17 +23,27 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
+        logger.info("beforeHandshake, uri:{}", request.getURI().toString());
+
         // 获得请求参数
-        Map<String, String> paramMap = HttpUtils.decodeParamMap(request.getURI().getQuery());
+        final WebSocketAttribute<String, String> urlParam = new WebSocketAttribute<>(HttpUtils.decodeParamMap(request.getURI().getQuery()));
+        final WebSocketAttribute<Object, String> sessionAttributeMap = new WebSocketAttribute<>(map);
+
+        String userId = urlParam.getUserId();
+        if (StringUtils.isEmpty(userId)) {
+            return false;
+        }
+        sessionAttributeMap.setUserId(userId);
+
         boolean isPass = false;
-        String publishId = paramMap.get("publishId");
+        String publishId = urlParam.getPublishId();
         if (!StringUtils.isEmpty(publishId)) {
-            map.put("publishId", publishId);
+            sessionAttributeMap.setPublishId(publishId);
             isPass = true;
         }
-        String subscribeId = paramMap.get("subscribeId");
+        String subscribeId = urlParam.getSubscribeId();
         if (!StringUtils.isEmpty(subscribeId)) {
-            map.put("subscribeId", subscribeId);
+            sessionAttributeMap.setSubscribeId(subscribeId);
             isPass = true;
         }
         return isPass;
@@ -40,6 +51,5 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
 
     @Override
     public void afterHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Exception e) {
-
     }
 }

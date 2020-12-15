@@ -1,13 +1,17 @@
 package com.sjq.live.support;
 
+import org.springframework.util.Assert;
+
 import javax.servlet.ServletInputStream;
 import java.io.IOException;
 
 public class ServletInputStreamProcessor implements InputStreamProcessor {
 
-    private ServletInputStream inputStream;
+    private final ServletInputStream inputStream;
 
-    public ServletInputStreamProcessor(ServletInputStream inputStream) {
+    public ServletInputStreamProcessor(final ServletInputStream inputStream) {
+        Assert.notNull(inputStream, "ServletInputStream不能为空");
+
         this.inputStream = inputStream;
     }
 

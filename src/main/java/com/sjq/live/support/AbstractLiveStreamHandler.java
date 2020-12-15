@@ -8,14 +8,16 @@ public abstract class AbstractLiveStreamHandler {
      *  发送flvheader + keyframe
      * @param bytes
      */
-    public void send(byte[] bytes) {
+    public void send(final byte[] bytes) {
         if (isFirst) {
             isFirst = false;
             onData(bytes);
         }
     }
 
-    public void send(byte[] bytes, byte[] headerData, boolean isTagHeaderStart) {
+    public void send(final byte[] bytes,
+                     final byte[] headerData,
+                     final boolean isTagHeaderStart) {
         if (isFirst) {//第一次发送的起始数据(包含flvHeader 和 keyFrames)
             synchronized (this) {
                 if (isFirst) {
@@ -30,7 +32,7 @@ public abstract class AbstractLiveStreamHandler {
         onData(bytes);
     }
 
-    protected abstract void onData(byte[] bytes);
+    protected abstract void onData(final byte[] bytes);
 
     public String getId() {
         return id;

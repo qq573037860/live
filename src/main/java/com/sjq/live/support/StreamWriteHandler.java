@@ -1,28 +1,30 @@
 package com.sjq.live.support;
 
+import org.springframework.util.Assert;
+
+import java.util.Objects;
+
 public class StreamWriteHandler {
 
-    private OutputStreamProcessor out;
-    private StreamCloseCallBack closeCallBack;
+    private final OutputStreamProcessor out;
+    private final CallBack closeCallBack;
 
-    public StreamWriteHandler(OutputStreamProcessor out, StreamCloseCallBack callBack) {
+    public StreamWriteHandler(final OutputStreamProcessor out,
+                              final CallBack callBack) {
+        Assert.notNull(out, "OutputStreamProcessor不能为空");
+
         this.out = out;
         this.closeCallBack = callBack;
     }
 
-    public void write(byte[] bytes) {
+    public void write(final byte[] bytes) {
         out.write(bytes);
     }
 
     public void close() {
         out.close();
-        closeCallBack.onClose();
-    }
-
-    /**
-     * stream关闭回调方法
-     */
-    public interface StreamCloseCallBack {
-        void onClose();
+        if (Objects.nonNull(closeCallBack)) {
+            closeCallBack.onClose();
+        }
     }
 }
