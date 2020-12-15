@@ -13,7 +13,7 @@ public abstract class AbstractLiveStreamHandler {
             isFirst = false;
             onData(bytes);
         }
-    };
+    }
 
     public void send(byte[] bytes, byte[] headerData, boolean isTagHeaderStart) {
         if (isFirst) {//第一次发送的起始数据(包含flvHeader 和 keyFrames)
