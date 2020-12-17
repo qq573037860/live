@@ -67,6 +67,12 @@
             <version>29.0-jre</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.30.Final</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -75,7 +81,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>Finchley.RC1</version>
+                <version>Finchley.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

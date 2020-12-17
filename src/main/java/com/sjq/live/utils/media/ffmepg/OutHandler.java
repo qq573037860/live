@@ -1,4 +1,4 @@
-package com.sjq.live.utils.ffmepg;
+package com.sjq.live.utils.media.ffmepg;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

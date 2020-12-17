@@ -15,6 +15,10 @@ spring:
       classpath: /templates   # 访问template下的html文件需要配置模板，映射
     cache: false # 开发时关闭缓存,不然没法看到实时页面
 
+stream:
+  converter: ffmpeg
+  transport: original
+
 
 
 

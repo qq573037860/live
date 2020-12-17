@@ -39,7 +39,7 @@
                 return;
             }
 
-            this._defaultParam.mediaDataSource["url"] = this._defaultParam.pushUrl + "subscribeId=" + subscribeId + "&userId=" + subscribeId;
+            this._defaultParam.mediaDataSource["url"] = this._defaultParam.pushUrl + "subscribeId=" + subscribeId + "&userId=" + new Date().getTime();
             let player = flvjs.createPlayer(this._defaultParam.mediaDataSource, this._defaultParam.optionalConfig);
             player.attachMediaElement(videoDom);
             player.load();

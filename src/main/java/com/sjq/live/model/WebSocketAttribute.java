@@ -1,4 +1,4 @@
-package com.sjq.live.support;
+package com.sjq.live.model;
 
 import org.springframework.util.Assert;
 
@@ -30,8 +30,12 @@ public class WebSocketAttribute<T , R> {
         return (R) attributeMap.get("userId");
     }
 
-    public R getStreamWriteHandler () {
-        return (R) attributeMap.get("streamHandler");
+    public R getPublishHandler () {
+        return (R) attributeMap.get("publishHandler");
+    }
+
+    public R getSubscribeHandler () {
+        return (R) attributeMap.get("subscribeHandler");
     }
 
     public void setPublishId(final T publishId) {
@@ -50,7 +54,11 @@ public class WebSocketAttribute<T , R> {
         attributeMap.put("userId", userId);
     }
 
-    public void setStreamWriteHandler (final T streamHandler) {
-        attributeMap.put("streamHandler", streamHandler);
+    public void setPublishHandler (final T publishHandler) {
+        attributeMap.put("publishHandler", publishHandler);
+    }
+
+    public void setSubscribeHandler (final T subscribeHandler) {
+        attributeMap.put("subscribeHandler", subscribeHandler);
     }
 }

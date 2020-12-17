@@ -1,17 +1,18 @@
 package com.sjq.live.support;
 
 import com.sjq.live.utils.FlvStreamParserUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DistributeStreamProcessor {
 
-    private final ServletInputStreamProcessor inputStreamProcessor;
-    private final ConcurrentLinkedQueue<AbstractLiveStreamHandler> subscribes = new ConcurrentLinkedQueue<>();
+    private final InputStreamProcessor inputStreamProcessor;
+    private final ConcurrentLinkedQueue<AbstractStreamDistributeHandler> subscribes = new ConcurrentLinkedQueue<>();
     private byte[] headerData;//头部数据: flvHeader + keyFrames
 
-    public DistributeStreamProcessor(final ServletInputStreamProcessor inputStreamProcessor) {
+    public DistributeStreamProcessor(final InputStreamProcessor inputStreamProcessor) {
         Assert.notNull(inputStreamProcessor, "ServletInputStreamProcessor不能为空");
 
         this.inputStreamProcessor = inputStreamProcessor;
@@ -21,22 +22,22 @@ public class DistributeStreamProcessor {
         //解析flv视频流数据
         FlvStreamParserUtil.parseStream(inputStreamProcessor, (tagData, flvHeaderData, isTagHeaderStart) -> {
             //发送tag数据
-            subscribes.parallelStream().forEach(abstractLiveStreamHandler -> {
-                abstractLiveStreamHandler.send(tagData, flvHeaderData, isTagHeaderStart);
+            subscribes.parallelStream().forEach(abstractStreamDistributeHandler -> {
+                abstractStreamDistributeHandler.send(tagData, flvHeaderData, isTagHeaderStart);
             });
-        }, datas -> {
+        }, headerData -> {
             //保存解析出来的头部数据
-            headerData = datas;
+            this.headerData = headerData;
         });
     }
 
-    public void addSubscribe(final AbstractLiveStreamHandler handler) {
+    public void addSubscribe(final AbstractStreamDistributeHandler handler) {
         //先把头部数据发送出去
         handler.send(headerData);
         this.subscribes.add(handler);
     }
 
-    public ConcurrentLinkedQueue<AbstractLiveStreamHandler> getSubscribes() {
-        return subscribes;
+    public void removeSubscribeById(final String id) {
+        subscribes.removeIf(handler -> StringUtils.equals(handler.getId(), id));
     }
 }

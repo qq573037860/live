@@ -4,13 +4,13 @@ import org.springframework.util.Assert;
 
 import java.util.Objects;
 
-public class StreamWriteHandler {
+public class PublishHandler {
 
     private final OutputStreamProcessor out;
     private final CallBack closeCallBack;
 
-    public StreamWriteHandler(final OutputStreamProcessor out,
-                              final CallBack callBack) {
+    public PublishHandler(final OutputStreamProcessor out,
+                          final CallBack callBack) {
         Assert.notNull(out, "OutputStreamProcessor不能为空");
 
         this.out = out;
@@ -24,7 +24,7 @@ public class StreamWriteHandler {
     public void close() {
         out.close();
         if (Objects.nonNull(closeCallBack)) {
-            closeCallBack.onClose();
+            closeCallBack.call();
         }
     }
 }

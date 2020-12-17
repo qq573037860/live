@@ -1,4 +1,4 @@
-package com.sjq.live.utils.ffmepg;
+package com.sjq.live.utils.media.ffmepg;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ class PrintStream extends Thread {
                 if (_ch == -1) {
                     break;
                 } else {
-                    logger.info(String.valueOf((char) _ch));
+                    System.out.print((char) _ch);
                 }
             }
         } catch (Exception e) {

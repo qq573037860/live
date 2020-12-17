@@ -1,6 +1,6 @@
 package com.sjq.live.service;
 
-import com.sjq.live.support.WebSocketAttribute;
+import com.sjq.live.model.WebSocketAttribute;
 import com.sjq.live.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

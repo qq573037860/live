@@ -22,7 +22,7 @@
             this.pushUrl = "wss://" + win.location.host + "/ws/publishVideoStream?"
         },
         _pushStream : function (publishId, onOpenCallBack) {
-            const url = this.pushUrl + "publishId=" + publishId;
+            const url = this.pushUrl + "publishId=" + publishId + "&userId=" + new Date().getTime();
             if (this._wsHandler[publishId]) {
                 throw publishId + '已经初始化过了';
             }

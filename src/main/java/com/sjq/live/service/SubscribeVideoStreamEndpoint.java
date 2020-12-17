@@ -1,9 +1,9 @@
 package com.sjq.live.service;
 
-import com.sjq.live.controller.TransformStreamManage;
-import com.sjq.live.model.SubscribeResponse;
-import com.sjq.live.support.AbstractLiveStreamHandler;
-import com.sjq.live.support.WebSocketAttribute;
+import com.sjq.live.model.OperateResponse;
+import com.sjq.live.support.AbstractStreamDistributeHandler;
+import com.sjq.live.model.WebSocketAttribute;
+import com.sjq.live.support.SubscribeHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Created by shenjq on 2019/12/2
@@ -27,7 +28,7 @@ public class SubscribeVideoStreamEndpoint extends AbstractBinaryWebSocketHandler
     private static final String path = "ws/subscribeVideoStream";
 
     @Autowired
-    private TransformStreamManage manage;
+    private TransformStream transformStream;
 
     public SubscribeVideoStreamEndpoint() {
         super(path);
@@ -43,10 +44,10 @@ public class SubscribeVideoStreamEndpoint extends AbstractBinaryWebSocketHandler
     private void subscribe(final WebSocketSession session) {
         final WebSocketAttribute<Object, String> attribute = new WebSocketAttribute<>(session.getAttributes());
         if (StringUtils.isEmpty(attribute.getRegisterId())) {
-            final SubscribeResponse<String> subscribeResponse = manage.subscribe(attribute.getUserId(), attribute.getSubscribeId(),
-                    new LiveStreamHandler(session));
-            if (StringUtils.isNotEmpty(subscribeResponse.getData())) {
-                attribute.setRegisterId(subscribeResponse.getData());
+            final StreamDistributeHandler handler = new StreamDistributeHandler(session);
+            final OperateResponse<SubscribeHandler> operateResponse = transformStream.subscribe(attribute.getUserId(), attribute.getSubscribeId(), handler);
+            if (operateResponse.isSuccess()) {
+                attribute.setSubscribeHandler(operateResponse.getData());
             }
         }
     }
@@ -59,15 +60,19 @@ public class SubscribeVideoStreamEndpoint extends AbstractBinaryWebSocketHandler
     }
 
     private void unSubscribe(final WebSocketSession session) {
-        final WebSocketAttribute<Object, String> attribute = new WebSocketAttribute<>(session.getAttributes());
-        manage.unSubscribe(attribute.getSubscribeId(), attribute.getRegisterId());
+        final WebSocketAttribute<Object, SubscribeHandler> attribute = new WebSocketAttribute<>(session.getAttributes());
+        final SubscribeHandler subscribeHandler = attribute.getSubscribeHandler();
+        if (Objects.nonNull(subscribeHandler)) {
+            subscribeHandler.unSubscribe();
+        }
     }
 
-    class LiveStreamHandler extends AbstractLiveStreamHandler {
+    class StreamDistributeHandler extends AbstractStreamDistributeHandler {
 
         private final WebSocketSession session;
 
-        LiveStreamHandler(WebSocketSession session) {
+        StreamDistributeHandler(WebSocketSession session) {
+            super();
             this.session = session;
         }
 

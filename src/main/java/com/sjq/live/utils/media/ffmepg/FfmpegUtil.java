@@ -1,4 +1,4 @@
-package com.sjq.live.utils.ffmepg;
+package com.sjq.live.utils.media.ffmepg;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;

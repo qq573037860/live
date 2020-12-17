@@ -1,8 +1,18 @@
 package com.sjq.live.support;
 
-public abstract class AbstractLiveStreamHandler {
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+public abstract class AbstractStreamDistributeHandler {
     private String id;
     private volatile boolean isFirst = true;
+
+    private Consumer<String> destoryCallBack;
+
+    protected AbstractStreamDistributeHandler() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     /**
      *  发送flvheader + keyframe
@@ -32,7 +42,19 @@ public abstract class AbstractLiveStreamHandler {
         onData(bytes);
     }
 
-    protected abstract void onData(final byte[] bytes);
+    public void destory() {
+        if (Objects.nonNull(destoryCallBack)) {
+            destoryCallBack.accept(id);
+        }
+    }
+
+    public Consumer<String> getDestoryCallBack() {
+        return destoryCallBack;
+    }
+
+    public void setDestoryCallBack(Consumer<String> destoryCallBack) {
+        this.destoryCallBack = destoryCallBack;
+    }
 
     public String getId() {
         return id;
@@ -41,4 +63,6 @@ public abstract class AbstractLiveStreamHandler {
     public void setId(String id) {
         this.id = id;
     }
+
+    protected abstract void onData(final byte[] bytes);
 }
