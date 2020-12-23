@@ -12,7 +12,7 @@ public class Queue<T> {
     public static void main(String[] args) throws InterruptedException {
         //ConcurrentQueue<Integer> queue = new ConcurrentQueue<>(1000);
         //ArrayBlockingQueue<Integer> queue = new ArrayBlockingQueue(1000);
-        Queue<Integer> queue = new Queue(1000);
+        Queue<Integer> queue = new Queue<>(1000);
         CountDownLatch countDownLatch = new CountDownLatch(2);
         long st = System.currentTimeMillis();
         StringBuilder pStr = new StringBuilder();
@@ -60,7 +60,7 @@ public class Queue<T> {
 /*    final VolatileLong tail;
     final VolatileLong head;*/
 
-    volatile long tail;
+    long tail;
     long p11, p12, p13, p14, p15, p16, p17;
     long head;
     long p21, p22, p23, p24, p25, p26, p27;
@@ -75,7 +75,7 @@ public class Queue<T> {
 
 
     public Queue(int preferCapacity) {
-        double pow = log2(Double.valueOf(preferCapacity));
+        double pow = log2((double) preferCapacity);
         double intValuePow = (long)pow + 0.0;
         this.capacity = intValuePow == pow ? preferCapacity : Double.valueOf(Math.pow(2.0d, intValuePow + 1)).intValue();
         array = new Object[this.capacity];
@@ -109,6 +109,9 @@ public class Queue<T> {
             } else {
                 break;
             }
+        }*/
+        /*while (null != array[p]) {
+
         }*/
 
         array[p] = obj;
