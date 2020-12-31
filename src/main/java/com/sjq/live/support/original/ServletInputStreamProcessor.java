@@ -9,6 +9,7 @@ import java.io.IOException;
 public class ServletInputStreamProcessor implements InputStreamProcessor {
 
     private final ServletInputStream inputStream;
+    private final byte[] data = new byte[1024*1024];
 
     public ServletInputStreamProcessor(final ServletInputStream inputStream) {
         Assert.notNull(inputStream, "ServletInputStream不能为空");
@@ -17,12 +18,23 @@ public class ServletInputStreamProcessor implements InputStreamProcessor {
     }
 
     @Override
-    public int read(byte[] bytes) throws IOException {
-        return inputStream.read(bytes);
+    public byte[] read() throws IOException {
+        if (!inputStream.isReady()) {
+            return null;
+        }
+        int len = inputStream.read(data);
+        if (-1 == len) {
+            return null;
+        }
+        if (len == data.length) {
+            return data;
+        }
+        byte[] newData = new byte[len];
+        System.arraycopy(data, 0, newData, 0, len);
+        return newData;
     }
 
     @Override
     public void close() throws IOException {
-        inputStream.close();
     }
 }

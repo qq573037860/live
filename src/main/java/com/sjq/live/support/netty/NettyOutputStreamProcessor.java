@@ -16,20 +16,25 @@ public class NettyOutputStreamProcessor extends OutputStreamProcessor {
         Assert.notNull(ctx, "ChannelHandlerContext不能为空");
 
         this.ctx = ctx;
+        //返回一个HttpChunk的开头
+        NettyUtils.writeHttpChunkResponse(ctx);
     }
 
     @Override
-    public void writeToStream(final byte[] bytes) throws IOException {
-        NettyUtils.responseHttp(bytes, null, ctx, false);
+    public void writeToStream(final byte[] bytes) {
+        //返回HttpChunkContent
+        NettyUtils.writeChunkContentResponse(ctx, bytes);
     }
 
     @Override
-    protected void flushStream() throws IOException {
+    public void flushStream() {
         ctx.flush();
     }
 
     @Override
-    protected void closeStream() throws IOException {
+    protected void closeStream() {
+        NettyUtils.wirteLastEmptyContentResponse(ctx);
+        ctx.flush();
         ctx.close();
     }
 }

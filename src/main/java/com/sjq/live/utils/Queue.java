@@ -1,7 +1,6 @@
 package com.sjq.live.utils;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * 适用1p-1c场景 非线程安全
@@ -10,9 +9,17 @@ import java.util.concurrent.locks.LockSupport;
 public class Queue<T> {
 
     public static void main(String[] args) throws InterruptedException {
+        long total = 0l;
+        for (int i = 0; i < 10; i++) {
+            total += test();
+        }
+        System.out.println("耗时：" + total/10);
+    }
+
+    private static long test() throws InterruptedException {
         //ConcurrentQueue<Integer> queue = new ConcurrentQueue<>(1000);
         //ArrayBlockingQueue<Integer> queue = new ArrayBlockingQueue(1000);
-        Queue<Integer> queue = new Queue(1000);
+        Queue<Integer> queue = new Queue<>(1000);
         CountDownLatch countDownLatch = new CountDownLatch(2);
         long st = System.currentTimeMillis();
         StringBuilder pStr = new StringBuilder();
@@ -23,7 +30,7 @@ public class Queue<T> {
             }
             queue.offer(-1);
             pStr.append(-1);
-            System.out.println("生产完毕");
+            //System.out.println("生产完毕");
             countDownLatch.countDown();
         });
         StringBuilder cStr = new StringBuilder();
@@ -36,7 +43,7 @@ public class Queue<T> {
                 cStr.append(value);
                 //System.out.println("消费:" + value);
                 if (-1 == value) {
-                    System.out.println("消费完毕");
+                    //System.out.println("消费完毕");
                     break;
                 }
             }
@@ -47,31 +54,27 @@ public class Queue<T> {
 
         countDownLatch.await();
 
-        System.out.println(pStr.toString());
-        System.out.println(cStr.toString());
-        System.out.println(pStr.toString().equals(cStr.toString()));
-        System.out.println("耗时:" + (System.currentTimeMillis() - st));
+        return System.currentTimeMillis() - st;
     }
 
-    volatile Object[] array;
+
     final int capacity;
     final int m;
+    volatile Object[] array;
 
 /*    final VolatileLong tail;
     final VolatileLong head;*/
-
-    volatile long tail;
+    long tail;
     long p11, p12, p13, p14, p15, p16, p17;
     long head;
     long p21, p22, p23, p24, p25, p26, p27;
-
 
 /*    boolean isStart = true;
 
     volatile Boolean lock = false;*/
 
-    private static final int MIN_PARKTIME_NS = 10;
-    private static final int MAX_PACKTIME_NS = 160;
+    private static final int MIN_PARK_TIME_NS = 10;
+    private static final int MAX_PACK_TIME_NS = 160;
 
 
     public Queue(int preferCapacity) {
@@ -100,14 +103,10 @@ public class Queue<T> {
 
         //判断生产者是否套圈
         for (;;) {
-            if (null != array[p]) {
-                try {
-                    Thread.sleep(1l);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
+            if (null == array[p]) {
                 break;
+            } else {
+                //LockSupport.parkNanos(MIN_PARKTIME_NS);
             }
         }
 
@@ -118,10 +117,24 @@ public class Queue<T> {
     public T poll() {
         int p = (int) (tail++ & this.m);
         Object r;
-        int parkTime = MIN_PARKTIME_NS;
+        //int parkTime = MIN_PARK_TIME_NS;
         while((r = array[p]) == null) {
-            LockSupport.parkNanos(parkTime);
-            if(parkTime < MAX_PACKTIME_NS) parkTime <<= 1;
+            //LockSupport.parkNanos(parkTime);
+            //if(parkTime < MAX_PACK_TIME_NS) parkTime <<= 1;
+        }
+        array[p] = null;
+        return (T) r;
+    }
+
+    public T poll(long timeout) {
+        int p = (int) (tail++ & this.m);
+        Object r;
+        long st = System.currentTimeMillis();
+        while((r = array[p]) == null) {
+            if (System.currentTimeMillis() - st >= timeout) {
+                tail--;
+                return null;
+            }
         }
         array[p] = null;
         return (T) r;

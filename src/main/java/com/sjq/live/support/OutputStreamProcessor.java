@@ -2,6 +2,8 @@ package com.sjq.live.support;
 
 import com.sjq.live.utils.Queue;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -63,7 +65,7 @@ public abstract class OutputStreamProcessor {
         write(new byte[]{});
     }
 
-    public void processData() throws IOException {
+    public void processData() {
         for (;;) {
             byte[] bytes = queue.poll();
             if (Objects.isNull(bytes)) {
@@ -77,10 +79,10 @@ public abstract class OutputStreamProcessor {
         closeStream();
     }
 
-    protected abstract void writeToStream(byte[] bytes) throws IOException;
+    protected abstract void writeToStream(byte[] bytes);
 
-    protected abstract void flushStream() throws IOException;
+    protected abstract void flushStream();
 
-    protected abstract void closeStream() throws IOException;
+    protected abstract void closeStream();
 
 }

@@ -17,17 +17,22 @@ public class ServletOutputStreamProcessor extends OutputStreamProcessor {
     }
 
     @Override
-    public void writeToStream(final byte[] bytes) throws IOException {
-        outputStream.write(bytes);
+    protected void writeToStream(final byte[] bytes) {
+        try {
+            outputStream.write(bytes);
+        } catch (IOException e){
+        }
     }
 
     @Override
-    protected void flushStream() throws IOException {
-        outputStream.flush();
+    protected void flushStream() {
+        try {
+            outputStream.flush();
+        } catch (IOException e){
+        }
     }
 
     @Override
-    protected void closeStream() throws IOException {
-        outputStream.close();
+    protected void closeStream() {
     }
 }

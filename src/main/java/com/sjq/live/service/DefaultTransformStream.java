@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -33,16 +32,6 @@ public class DefaultTransformStream implements TransformStream {
     private static final Map<String, OutputStreamProcessor> outStreamMap = new ConcurrentHashMap<>();
     private static final Map<String, DistributeStreamProcessor> distributeStreamMap = new ConcurrentHashMap<>();
     private static final Map<String, Set<String>> subscribeUserIdsMap = new ConcurrentHashMap<>();
-
-    /*@Override
-    public void initEndpoint() {
-        initEndpoint();
-    }*/
-
-    /*abstract void initEndpoint(final String serverIp,
-                               final Integer serverPort,
-                               final String originStreamPath,
-                               final String transformedStreamPath);*/
 
     @Override
     public OperateResponse<PublishHandler> publish(String publishId) throws LiveException {
@@ -110,17 +99,13 @@ public class DefaultTransformStream implements TransformStream {
     }
 
     @Override
-    public void outputOriginalStream(final String publishId,
-                                     final OutputStreamProcessor streamProcessor) {
+    public void processOriginalStream(final String publishId,
+                                      final OutputStreamProcessor streamProcessor) {
         //注册管道流
         outStreamMap.put(publishId, streamProcessor);
         //开始从管道中读取数据
-        try {
-            streamProcessor.processData();
-        } catch (IOException e) {
-            logger.error("publishId:{}, 输出OriginalStream异常", publishId, e);
-        }
-        logger.info("publishId:{}, originStream流关闭", publishId);
+        streamProcessor.processData();
+        logger.info("[processOriginalStream] publishId:{}, originStream流关闭", publishId);
     }
 
     @Override
@@ -135,9 +120,9 @@ public class DefaultTransformStream implements TransformStream {
             //开始分发视频流数据
             processor.distribute();
 
-            logger.info("publishId:{}, transformedStream流关闭", publishId);
+            logger.info("[processTransformedStream] publishId:{}, transformedStream流关闭", publishId);
         } else {
-            logger.info("DistributeStreamProcessor[publishId:{}]已存在", publishId);
+            logger.info("[processTransformedStream] DistributeStreamProcessor[publishId:{}]已存在", publishId);
         }
     }
 }

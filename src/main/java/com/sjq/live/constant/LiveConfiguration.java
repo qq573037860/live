@@ -11,17 +11,17 @@ public class LiveConfiguration {
     @Value("${server.extranet}")
     private String serverIp;
 
-    private static final String ORIGIN_STREAM_PROTOCOL = "https";
-    private static final String TRANSFORMED_STREAM_PROTOCOL = "https";
-    private static final String ORIGIN_STREAM_PATH = "/originStream";
-    private static final String TRANSFORMED_STREAM_PATH = "/transformedStream";
+    private static final String ORIGIN_STREAM_PROTOCOL = "http";
+    private static final String TRANSFORMED_STREAM_PROTOCOL = "http";
+    public static final String ORIGIN_STREAM_PATH = "/originStream";
+    public static final String TRANSFORMED_STREAM_PATH = "/transformedStream";
 
     public String buildOriginStreamUrl(final String publishId) {
         return String.format("%s://%s:%s%s?publishId=%s", ORIGIN_STREAM_PROTOCOL, serverIp, serverPort, ORIGIN_STREAM_PATH, publishId);
     }
 
     public String buildTransformedStreamUrl(final String publishId) {
-        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, serverPort, TRANSFORMED_STREAM_PATH, publishId);
+        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, /*serverPort*/9999, TRANSFORMED_STREAM_PATH, publishId);
     }
 
     public Integer getServerPort() {
@@ -40,11 +40,4 @@ public class LiveConfiguration {
         return TRANSFORMED_STREAM_PROTOCOL;
     }
 
-    public static String getOriginStreamPath() {
-        return ORIGIN_STREAM_PATH;
-    }
-
-    public static String getTransformedStreamPath() {
-        return TRANSFORMED_STREAM_PATH;
-    }
 }

@@ -1,6 +1,6 @@
 package com.sjq.live.model;
 
-public class LiveException extends Exception {
+public class LiveException extends RuntimeException {
 
     public LiveException() {
         super();

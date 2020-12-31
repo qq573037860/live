@@ -45,25 +45,7 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
             attribute.setPublishHandler(operateResponse.getData());
         }
 
-        new Thread(() -> {
-            FileInputStream in;
-            try {
-                in = new FileInputStream("D:\\BaiduNetdiskDownload\\01Python快速入门\\a.mp4");
-                byte[] bytes = new byte[1024];
-                int len = 0;
-                while (true) {
-                    try {
-                        if ((len = in.read(bytes)) == -1) break;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    handleBinaryMessage(session, new BinaryMessage(bytes, 0, len, true));
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-        }).start();
+        handleBinaryMessage(session, null);
     }
 
     /**
@@ -76,7 +58,30 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
         final WebSocketAttribute<Object, PublishHandler> attribute = new WebSocketAttribute<>(session.getAttributes());
         //向管道中写入数据
         final PublishHandler writeHandler = attribute.getPublishHandler();
-        writeHandler.write(message.getPayload().array());
+
+        FileInputStream in;
+        try {
+            in = new FileInputStream("D:\\BaiduNetdiskDownload\\01Python快速入门\\b_edit.mp4");
+            byte[] bytes = new byte[1024*8];
+            int len = 0;
+            while (true) {
+                try {
+                    if ((len = in.read(bytes)) == -1) break;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //handleBinaryMessage(session, new BinaryMessage(bytes, 0, len, true));
+                byte[] b = new byte[len];
+                System.arraycopy(bytes, 0, b, 0, len);
+                writeHandler.write(b);
+            }
+            in.close();
+            writeHandler.write(new byte[0]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //writeHandler.write(message.getPayload().array());
     }
 
     @Override

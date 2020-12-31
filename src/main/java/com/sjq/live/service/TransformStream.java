@@ -12,8 +12,8 @@ public interface TransformStream {
                                                 final String subscribeId,
                                                 final AbstractStreamDistributeHandler handler);
 
-    void outputOriginalStream(final String publishId,
-                              final OutputStreamProcessor streamProcessor);
+    void processOriginalStream(final String publishId,
+                               final OutputStreamProcessor streamProcessor);
 
     void processTransformedStream(final String publishId,
                                   final InputStreamProcessor streamProcessor);

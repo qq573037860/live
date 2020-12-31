@@ -2,37 +2,40 @@ package com.sjq.live.utils;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
-
-import java.util.Objects;
+import io.netty.handler.codec.http.*;
 
 public class NettyUtils {
 
-    public static void responseHttp(final byte[] responseBytes,
-                                    final Integer contentLength,
-                                    final ChannelHandlerContext ctx) {
-        responseHttp(responseBytes, contentLength, ctx, true);
+    public static void writeHttpOkResponse(final ChannelHandlerContext ctx) {
+        writeSimpleHttpResponse(ctx, HttpResponseStatus.OK);
     }
 
-    public static void responseHttp(final byte[] responseBytes,
-                                    final Integer contentLength,
-                                    final ChannelHandlerContext ctx,
-                                    final boolean flush) {
-        // 构造FullHttpResponse对象，FullHttpResponse包含message body
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(responseBytes));
-        response.headers().set("Content-Type", "text/html; charset=utf-8");
-        if (Objects.nonNull(contentLength)) {
-            response.headers().set("Content-Length", contentLength);
-        }
+    public static void writeHttpNotFoundResponse(final ChannelHandlerContext ctx) {
+        writeSimpleHttpResponse(ctx, HttpResponseStatus.NOT_FOUND);
+    }
 
-        if (flush) {
-            ctx.writeAndFlush(response);
-        } else {
-            ctx.write(response);
-        }
+    public static void writeSimpleHttpResponse(final ChannelHandlerContext ctx,
+                                               final HttpResponseStatus status) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
+        response.headers().set("Content-Length", 0);
+        ctx.write(response);
+    }
+
+    public static void writeHttpChunkResponse(final ChannelHandlerContext ctx) {
+        HttpHeaders headers = new DefaultHttpHeaders();
+        headers.set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+        HttpResponse resp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, headers);
+        ctx.write(resp);
+    }
+
+    public static void writeChunkContentResponse(final ChannelHandlerContext ctx,
+                                                 final byte[] data) {
+        DefaultHttpContent chunk = new DefaultHttpContent(Unpooled.wrappedBuffer(data));
+        ctx.write(chunk);
+    }
+
+    public static void wirteLastEmptyContentResponse(final ChannelHandlerContext ctx) {
+        ctx.write(LastHttpContent.EMPTY_LAST_CONTENT);
     }
 
 }

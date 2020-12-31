@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public interface InputStreamProcessor {
 
-    int read(byte[] bytes) throws IOException;
+    byte[] read() throws IOException;
 
     void close() throws IOException;
 

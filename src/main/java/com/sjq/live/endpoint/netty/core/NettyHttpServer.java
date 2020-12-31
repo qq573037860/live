@@ -1,4 +1,4 @@
-package com.sjq.live.endpoint.netty;
+package com.sjq.live.endpoint.netty.core;
 
 import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.TransformStreamEndpointHook;
@@ -7,7 +7,6 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,23 +16,20 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-@Component
-@ConditionalOnProperty(value = "stream.transport", havingValue = "netty")
-public class NettyServer {
+public class NettyHttpServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(NettyHttpServer.class);
 
-    @Autowired
-    private TransformStreamEndpointHook transformStreamEndpointHook;
-    @Autowired
     private LiveConfiguration liveConfiguration;
 
-    @PostConstruct
-    private void init() {
-        doOpen();
+    public NettyHttpServer(LiveConfiguration liveConfiguration) {
+        this.liveConfiguration = liveConfiguration;
+
+        NettyEndPointRegister.register();
+        openHttpServer();
     }
 
-    private void doOpen() {
+    private void openHttpServer() {
         ServerBootstrap bootstrap = new ServerBootstrap();
 
         EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
@@ -51,15 +47,15 @@ public class NettyServer {
                     protected void initChannel(SocketChannel ch) {
                         ch.pipeline()
                             .addLast(new HttpServerCodec())
-                            .addLast("httpAggregator",new HttpObjectAggregator(1024*1024)) // http 消息聚合器(解析body中的数据)
-                            .addLast(new NettyHttpHandler(transformStreamEndpointHook));
+                            //.addLast("httpAggregator",new HttpObjectAggregator(1024*1024)) // http 消息聚合器(解析body中的数据)
+                            .addLast(new NettyHttpHandler());
                     }
                 });
         // bind
-        ChannelFuture channelFuture = bootstrap.bind(liveConfiguration.getServerPort());
+        ChannelFuture channelFuture = bootstrap.bind(/*liveConfiguration.getServerPort()*/9999);
         channelFuture.syncUninterruptibly();
         Channel channel = channelFuture.channel();
-        channel.closeFuture().addListener(future -> {logger.info("服务器端关闭");});
+        channel.closeFuture().addListener(future -> logger.info("服务器端关闭"));
         logger.info("netty server starts successfully");
     }
 

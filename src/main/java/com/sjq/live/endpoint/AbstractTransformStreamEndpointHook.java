@@ -14,7 +14,7 @@ public abstract class AbstractTransformStreamEndpointHook implements TransformSt
     @Override
     public void originStreamReach(final String publishId,
                                   final OutputStreamProcessor streamProcessor) {
-        transformStream.outputOriginalStream(publishId, streamProcessor);
+        transformStream.processOriginalStream(publishId, streamProcessor);
     }
 
     @Override

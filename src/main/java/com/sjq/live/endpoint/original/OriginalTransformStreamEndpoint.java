@@ -1,17 +1,14 @@
 package com.sjq.live.endpoint.original;
 
+import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.AbstractTransformStreamEndpointHook;
 import com.sjq.live.support.original.ServletInputStreamProcessor;
 import com.sjq.live.support.original.ServletOutputStreamProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@Controller
-@ConditionalOnProperty(value = "stream.transport", havingValue = "original")
 public class OriginalTransformStreamEndpoint extends AbstractTransformStreamEndpointHook {
 
     /**
@@ -19,8 +16,9 @@ public class OriginalTransformStreamEndpoint extends AbstractTransformStreamEndp
      * @param response
      * @throws Exception
      */
-    @RequestMapping("/originStream")
+    @RequestMapping(LiveConfiguration.ORIGIN_STREAM_PATH)
     public void originStream(HttpServletResponse response, String publishId) throws Exception {
+        response.getOutputStream().flush();
         originStreamReach(publishId, new ServletOutputStreamProcessor(response.getOutputStream()));
     }
 
@@ -29,13 +27,9 @@ public class OriginalTransformStreamEndpoint extends AbstractTransformStreamEndp
      * @param request
      * @throws Exception
      */
-    @RequestMapping("/transformedStream")
-    public void transformedStream(HttpServletRequest request, String publishId) throws Exception {
-        while (request.getHeaderNames().hasMoreElements()) {
-            System.out.print(request.getHeader(request.getHeaderNames().nextElement()) + " ");
-        }
-        System.out.println("-----------------------------------------------------------------");
+    @RequestMapping(LiveConfiguration.TRANSFORMED_STREAM_PATH)
+    public void transformedStream(HttpServletRequest request, HttpServletResponse response, String publishId) throws Exception {
         transformedStreamReach(publishId, new ServletInputStreamProcessor(request.getInputStream()));
+        response.setStatus(200);
     }
-
 }
