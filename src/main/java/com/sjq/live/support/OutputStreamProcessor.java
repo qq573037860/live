@@ -5,6 +5,7 @@ import com.sjq.live.utils.Queue;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Objects;
 
 public abstract class OutputStreamProcessor {
@@ -73,7 +74,9 @@ public abstract class OutputStreamProcessor {
             } else if (bytes.length == 0) {
                 break;
             }
+            System.out.println("开始writeToStream：" + new Date());
             writeToStream(bytes);
+            System.out.println("开始flushStream：" + new Date());
             flushStream();
         }
         closeStream();

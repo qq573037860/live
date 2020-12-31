@@ -4,11 +4,14 @@ import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.AbstractTransformStreamEndpointHook;
 import com.sjq.live.support.original.ServletInputStreamProcessor;
 import com.sjq.live.support.original.ServletOutputStreamProcessor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@Controller
 public class OriginalTransformStreamEndpoint extends AbstractTransformStreamEndpointHook {
 
     /**
