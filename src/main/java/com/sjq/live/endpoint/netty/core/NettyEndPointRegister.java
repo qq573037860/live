@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.*;
 
 public class NettyEndPointRegister {
 
@@ -70,6 +71,11 @@ public class NettyEndPointRegister {
 
     public static class MethodInvokerHandler {
 
+        private final static ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(1,
+                Runtime.getRuntime().availableProcessors(),
+                6000L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>());
+
         private EndpointWrapper endpointWrapper;
 
         private Object instance;
@@ -84,6 +90,16 @@ public class NettyEndPointRegister {
             } catch (Exception e) {
                 throw new LiveException(e);
             }
+        }
+
+        public void invokeAsyn(Object[] args) {
+            EXECUTOR_SERVICE.execute(() -> {
+                try {
+                    endpointWrapper.invokeMethod(instance, methodName, argsTypes, args);
+                } catch (Exception e) {
+                    throw new LiveException(e);
+                }
+            });
         }
 
         public MethodInvokerHandler(EndpointWrapper endpointWrapper, Object instance, String methodName, Class<?>[] argsTypes) {

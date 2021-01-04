@@ -74,9 +74,7 @@ public abstract class OutputStreamProcessor {
             } else if (bytes.length == 0) {
                 break;
             }
-            System.out.println("开始writeToStream：" + new Date());
             writeToStream(bytes);
-            System.out.println("开始flushStream：" + new Date());
             flushStream();
         }
         closeStream();

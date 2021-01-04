@@ -34,8 +34,11 @@ public class NettyUtils {
         ctx.write(chunk);
     }
 
-    public static void wirteLastEmptyContentResponse(final ChannelHandlerContext ctx) {
+    public static void writeLastEmptyContentResponse(final ChannelHandlerContext ctx) {
         ctx.write(LastHttpContent.EMPTY_LAST_CONTENT);
     }
 
+    public static void writeContinueResponse(final ChannelHandlerContext ctx) {
+        ctx.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE));
+    }
 }

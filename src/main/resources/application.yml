@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: 8889
   # 服务器外网ip
   extranet: 127.0.0.1
   ssl:

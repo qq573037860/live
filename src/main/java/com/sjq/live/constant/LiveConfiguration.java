@@ -21,7 +21,7 @@ public class LiveConfiguration {
     }
 
     public String buildTransformedStreamUrl(final String publishId) {
-        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, serverPort, TRANSFORMED_STREAM_PATH, publishId);
+        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, /*serverPort*/9999, TRANSFORMED_STREAM_PATH, publishId);
     }
 
     public Integer getServerPort() {

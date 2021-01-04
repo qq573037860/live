@@ -5,9 +5,6 @@ import com.sjq.live.utils.NettyUtils;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.util.Assert;
 
-import javax.servlet.ServletOutputStream;
-import java.io.IOException;
-
 public class NettyOutputStreamProcessor extends OutputStreamProcessor {
 
     private final ChannelHandlerContext ctx;
@@ -33,7 +30,7 @@ public class NettyOutputStreamProcessor extends OutputStreamProcessor {
 
     @Override
     protected void closeStream() {
-        NettyUtils.wirteLastEmptyContentResponse(ctx);
+        NettyUtils.writeLastEmptyContentResponse(ctx);
         ctx.flush();
         ctx.close();
     }
