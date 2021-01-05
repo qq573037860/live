@@ -22,9 +22,8 @@ public class FlvStreamParserUtil {
         int totalLen = 0;
         byte[] rs = null;
         do {
-            byte[] data = in.read();
-            if (Objects.isNull(data)) {
-                break;
+            byte[] data;
+            while (Objects.isNull(data = in.read())) {
             }
             totalLen += data.length;
             //合并数据

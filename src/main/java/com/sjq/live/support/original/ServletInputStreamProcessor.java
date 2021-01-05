@@ -19,9 +19,6 @@ public class ServletInputStreamProcessor implements InputStreamProcessor {
 
     @Override
     public byte[] read() throws IOException {
-        if (!inputStream.isReady()) {
-            return null;
-        }
         int len = inputStream.read(data);
         if (-1 == len) {
             return null;

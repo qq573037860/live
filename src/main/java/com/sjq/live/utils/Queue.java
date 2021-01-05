@@ -101,14 +101,14 @@ public class Queue<T> {
         if(obj == null) throw new IllegalArgumentException("Can't put null object into this queue");
         int p =(int) (head++ & this.m);
 
-        //判断生产者是否套圈
-        for (;;) {
+        //判断生产者是否套圈（针对直播的场景，要求不是特别高，允许数据覆盖）
+        /*for (;;) {
             if (null == array[p]) {
                 break;
             } else {
                 //LockSupport.parkNanos(MIN_PARKTIME_NS);
             }
-        }
+        }*/
 
         array[p] = obj;
         return true;

@@ -7,17 +7,18 @@
 
     VideoDataRecorder.prototype = {
         _defaultParam : {
-            record : {
-                audio: true,
-                video:{width:480,height:320}
+            "record" : {
+                "audio": {"sampleSize":8,"channelCount":1,"echoCancellation":false},
+                "video": {"width":320,"height":240,"frameRate":1,"sampleRate":1}
             },
-            videoDom : null,
-            URL : window.URL || window.webkitURL,
-            dataHandler : null,
-            recorder : null,
-            stream : null
+            "videoDom" : null,
+            "URL" : window.URL || window.webkitURL,
+            "dataHandler" : null,
+            "recorder" : null,
+            "stream" : null
         },
         _init : function(options) {
+            alert(JSON.stringify(this._defaultParam.record));
             if (!this._isDom(options["videoDom"])) {
                 throw 'videoDom不是dom对象';
             }
@@ -62,7 +63,7 @@
             let _self = this;
             //视频数据录制
             if (this._defaultParam.dataHandler) {
-                let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm'});
+                let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm',audioBitsPerSecond: 1280,videoBitsPerSecond: 5000,});
                 this._defaultParam.recorder = recorder;
                 recorder.start(1);
                 recorder.addEventListener('dataavailable', function (e) {

@@ -51,7 +51,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
             processHttpRequest(request, ctx);
         } else if (msg instanceof DefaultHttpContent) {
             DefaultHttpContent defaultHttpContent = (DefaultHttpContent) msg;
-            processHttpContent(defaultHttpContent);
+            processChunkedHttpContent(defaultHttpContent);
         } else if (msg instanceof LastHttpContent) {
             LastHttpContent lastHttpContent = (LastHttpContent) msg;
             processLastHttpContent(lastHttpContent, ctx);
@@ -86,26 +86,40 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
         final List<String> publishIds = queryStringDecoder.parameters().get("publishId");
         final String path = new URI(request.uri()).getPath();
+        final ByteBuf content = request instanceof DefaultFullHttpRequest ? ((DefaultFullHttpRequest)request).content() : null;
 
-        //注册endPoint
-        NettyEndPointRegister.MethodInvokerHandler methodInvokerHandler = NettyEndPointRegister.match(path, HttpMethod.resolve(request.method().name()));
-        if (Objects.isNull(methodInvokerHandler)) {//返回404
-            NettyUtils.writeHttpNotFoundResponse(ctx);
-            return;
+        try {
+            //注册endPoint
+            NettyEndPointRegister.MethodInvokerHandler methodInvokerHandler = NettyEndPointRegister.match(path, HttpMethod.resolve(request.method().name()));
+            if (Objects.isNull(methodInvokerHandler)) {//返回404
+                NettyUtils.writeHttpNotFoundResponse(ctx);
+                return;
+            }
+
+            //保存请求数据
+            THREAD_LOCAL.remove();
+            NettyRequestParam nettyRequestParam = THREAD_LOCAL.get();
+            nettyRequestParam.setPublishId(CollectionUtils.isEmpty(publishIds) ? null : publishIds.get(0));
+            nettyRequestParam.setPath(path);
+            nettyRequestParam.setChunkedReq(StringUtils.equals(request.headers().get(HttpHeaderNames.TRANSFER_ENCODING), HttpHeaderValues.CHUNKED));
+            nettyRequestParam.setMethodInvokerHandler(methodInvokerHandler);
+
+            if (nettyRequestParam.isChunkedReq()) {
+                //如果是chunked请求,提前调用
+                processChunkedRequest(ctx, nettyRequestParam, methodInvokerHandler);
+            } else if (request instanceof DefaultFullHttpRequest) {
+                //如果是个完成请求，则直接调用
+                processFullHttpRequest(nettyRequestParam, ctx);
+            }
+        } finally {
+            if (Objects.nonNull(content)) {
+                ReferenceCountUtil.release(content);
+            }
         }
+    }
 
-        //保存请求数据
-        THREAD_LOCAL.remove();
-        NettyRequestParam nettyRequestParam = THREAD_LOCAL.get();
-        nettyRequestParam.setPublishId(CollectionUtils.isEmpty(publishIds) ? null : publishIds.get(0));
-        nettyRequestParam.setPath(path);
-        nettyRequestParam.setChunkedReq(StringUtils.equals(request.headers().get(HttpHeaderNames.TRANSFER_ENCODING), HttpHeaderValues.CHUNKED));
-        nettyRequestParam.setMethodInvokerHandler(methodInvokerHandler);
-
-        //chunked请求,提前调用
-        if (nettyRequestParam.isChunkedReq()) {
-            processChunkedRequest(ctx, nettyRequestParam, methodInvokerHandler);
-        }
+    private void processFullHttpRequest(NettyRequestParam nettyRequestParam, ChannelHandlerContext ctx) {
+        nettyRequestParam.getMethodInvokerHandler().invoke(new Object[]{nettyRequestParam.getPublishId(), new NettyOutputStreamProcessor(ctx)});
     }
 
     private void processChunkedRequest(ChannelHandlerContext ctx,
@@ -119,7 +133,17 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         methodInvokerHandler.invokeAsyn(new Object[]{nettyRequestParam.getPublishId(), nettyInputStreamProcessor});
     }
 
-    private void processHttpContent(DefaultHttpContent defaultHttpContent) {
+    private void processLastChunkedRequest(ByteBuf byteBuf, NettyRequestParam nettyRequestParam) {
+        //添加httpChunkContent
+        byte[] lastContent = byteBuf.array();
+        if (lastContent.length > 0) {
+            nettyRequestParam.getChunkDataHandler().offer(lastContent);
+        }
+        //chunked数据接收完毕
+        nettyRequestParam.getChunkDataHandler().reachEnd();
+    }
+
+    private void processChunkedHttpContent(DefaultHttpContent defaultHttpContent) {
         NettyRequestParam nettyRequestParam = THREAD_LOCAL.get();
         ByteBuf byteBuf = defaultHttpContent.content();
         try {
@@ -143,16 +167,11 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = lastHttpContent.content();
         try {
             if (nettyRequestParam.isChunkedReq()) {
-                //添加httpChunkContent
-                byte[] lastContent = byteBuf.array();
-                if (lastContent.length > 0) {
-                    nettyRequestParam.getChunkDataHandler().offer(lastContent);
-                }
-                //chunked数据接收完毕
-                nettyRequestParam.getChunkDataHandler().reachEnd();
+                //处理最后一次chunked请求数据
+                processLastChunkedRequest(byteBuf, nettyRequestParam);
             } else {
                 //处理Http普通请求
-                nettyRequestParam.getMethodInvokerHandler().invoke(new Object[]{nettyRequestParam.getPublishId(), new NettyOutputStreamProcessor(ctx)});
+                processFullHttpRequest(nettyRequestParam, ctx);
             }
         } finally {
             ReferenceCountUtil.release(byteBuf);

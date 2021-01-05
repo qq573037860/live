@@ -45,7 +45,7 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
             attribute.setPublishHandler(operateResponse.getData());
         }
 
-        handleBinaryMessage(session, null);
+        //handleBinaryMessage(session, null);
     }
 
     /**
@@ -58,8 +58,9 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
         final WebSocketAttribute<Object, PublishHandler> attribute = new WebSocketAttribute<>(session.getAttributes());
         //向管道中写入数据
         final PublishHandler writeHandler = attribute.getPublishHandler();
+        writeHandler.write(message.getPayload().array());
 
-        FileInputStream in;
+        /*FileInputStream in;
         try {
             in = new FileInputStream("D:\\BaiduNetdiskDownload\\01Python快速入门\\b_edit.mp4");
             byte[] bytes = new byte[1024*8];
@@ -79,9 +80,9 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
             writeHandler.write(new byte[0]);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
-        //writeHandler.write(message.getPayload().array());
+
     }
 
     @Override
@@ -92,6 +93,6 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
         if (Objects.nonNull(handler)) {
             handler.close();
         }
-        logger.info("client onclose：" + session.toString());
+        logger.info("client onclose[session={},status={}]", session, status);
     }
 }

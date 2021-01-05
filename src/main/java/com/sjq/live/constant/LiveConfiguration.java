@@ -12,7 +12,7 @@ public class LiveConfiguration {
     private String serverIp;
 
     private static final String ORIGIN_STREAM_PROTOCOL = "https";
-    private static final String TRANSFORMED_STREAM_PROTOCOL = "http";
+    private static final String TRANSFORMED_STREAM_PROTOCOL = "https";
     public static final String ORIGIN_STREAM_PATH = "/originStream";
     public static final String TRANSFORMED_STREAM_PATH = "/transformedStream";
 
@@ -21,7 +21,7 @@ public class LiveConfiguration {
     }
 
     public String buildTransformedStreamUrl(final String publishId) {
-        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, /*serverPort*/9999, TRANSFORMED_STREAM_PATH, publishId);
+        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, serverPort, TRANSFORMED_STREAM_PATH, publishId);
     }
 
     public Integer getServerPort() {
