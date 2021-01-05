@@ -35,12 +35,12 @@ public class HttpUtils {
      * @param strUrlParam url地址
      * @return url请求参数部分
      */
-    public static Map<String, String> decodeParamMap(String strUrlParam) {
+    public static Map<String, Object> decodeParamMap(String strUrlParam) {
         if (StringUtils.isEmpty(strUrlParam)) {
             return Collections.emptyMap();
         }
 
-        Map<String, String> mapRequest = new HashMap<String, String>();
+        Map<String, Object> mapRequest = new HashMap<>();
         String[] arrSplit;
         //每个键值为一组 www.2cto.com
         arrSplit = strUrlParam.split("[&]");

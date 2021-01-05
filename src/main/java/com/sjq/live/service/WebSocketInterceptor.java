@@ -26,8 +26,8 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
         logger.info("beforeHandshake, uri:{}", request.getURI().toString());
 
         // 获得请求参数
-        final WebSocketAttribute<String, String> urlParam = new WebSocketAttribute<>(HttpUtils.decodeParamMap(request.getURI().getQuery()));
-        final WebSocketAttribute<Object, String> sessionAttributeMap = new WebSocketAttribute<>(map);
+        final WebSocketAttribute urlParam = new WebSocketAttribute(HttpUtils.decodeParamMap(request.getURI().getQuery()));
+        final WebSocketAttribute<String, String> sessionAttributeMap = new WebSocketAttribute<>(map);
 
         String userId = urlParam.getUserId();
         if (StringUtils.isEmpty(userId)) {

@@ -1,64 +1,66 @@
 package com.sjq.live.model;
 
+import com.sjq.live.support.PublishHandler;
+import com.sjq.live.support.SubscribeHandler;
 import org.springframework.util.Assert;
 
 import java.util.Map;
 
-public class WebSocketAttribute<T , R> {
+public class WebSocketAttribute {
 
-    private final Map<String, T> attributeMap;
+    private final Map<String, Object> attributeMap;
 
-    public WebSocketAttribute(final Map<String, T> attributeMap) {
+    public WebSocketAttribute(final Map<String, Object> attributeMap) {
         Assert.notNull(attributeMap, "attributeMap不能为空");
 
         this.attributeMap = attributeMap;
     }
 
-    public R getPublishId() {
-        return (R) attributeMap.get("publishId");
+    public String getPublishId() {
+        return (String) attributeMap.get("publishId");
     }
 
-    public R getSubscribeId() {
-        return (R) attributeMap.get("subscribeId");
+    public String getSubscribeId() {
+        return (String) attributeMap.get("subscribeId");
     }
 
-    public R getRegisterId() {
-        return (R) attributeMap.get("registerId");
+    public String getRegisterId() {
+        return (String) attributeMap.get("registerId");
     }
 
-    public R getUserId() {
-        return (R) attributeMap.get("userId");
+    public String getUserId() {
+        return (String) attributeMap.get("userId");
     }
 
-    public R getPublishHandler () {
-        return (R) attributeMap.get("publishHandler");
+    public PublishHandler getPublishHandler () {
+        return (PublishHandler) attributeMap.get("publishHandler");
     }
 
-    public R getSubscribeHandler () {
-        return (R) attributeMap.get("subscribeHandler");
+    public SubscribeHandler getSubscribeHandler () {
+        return (SubscribeHandler) attributeMap.get("subscribeHandler");
     }
 
-    public void setPublishId(final T publishId) {
+    public void setPublishId(final String publishId) {
         attributeMap.put("publishId", publishId);
     }
 
-    public void setSubscribeId(final T subscribeId) {
+    public void setSubscribeId(final String subscribeId) {
         attributeMap.put("subscribeId", subscribeId);
     }
 
-    public void setRegisterId(final T registerId) {
+    public void setRegisterId(final String registerId) {
         attributeMap.put("registerId", registerId);
     }
 
-    public void setUserId(final T userId) {
+    public void setUserId(final String userId) {
         attributeMap.put("userId", userId);
     }
 
-    public void setPublishHandler (final T publishHandler) {
+    public void setPublishHandler (final PublishHandler publishHandler) {
         attributeMap.put("publishHandler", publishHandler);
     }
 
-    public void setSubscribeHandler (final T subscribeHandler) {
+    public void setSubscribeHandler (final SubscribeHandler subscribeHandler) {
         attributeMap.put("subscribeHandler", subscribeHandler);
     }
 }

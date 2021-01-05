@@ -1,6 +1,6 @@
 package com.sjq.live.service;
 
-import com.sjq.live.model.OperateResponse;
+import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.support.PublishHandler;
 import com.sjq.live.model.WebSocketAttribute;
 import org.slf4j.Logger;
@@ -11,11 +11,6 @@ import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Objects;
-
 /**
  * Created by shenjq on 2019/12/2
  */
@@ -25,25 +20,19 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(PublishVideoStreamEndpoint.class);
 
-    private static final String path = "ws/publishVideoStream";
-
     @Autowired
-    private TransformStream transformStream;
+    private PublishVideoStreamProcessor publishVideoStreamProcessor;
 
     public PublishVideoStreamEndpoint() {
-        super(path);
+        super(LiveConfiguration.PUBLISH_PATH);
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         logger.info("client opened: " + session.toString());
 
-        final WebSocketAttribute<Object, String> attribute = new WebSocketAttribute<>(session.getAttributes());
-        //获取写入流句柄
-        final OperateResponse<PublishHandler> operateResponse = transformStream.publish(attribute.getPublishId());
-        if (operateResponse.isSuccess()) {
-            attribute.setPublishHandler(operateResponse.getData());
-        }
+        final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
+        publishVideoStreamProcessor.afterConnectionEstablished(attribute);
 
         //handleBinaryMessage(session, null);
     }
@@ -55,10 +44,8 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
      */
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        final WebSocketAttribute<Object, PublishHandler> attribute = new WebSocketAttribute<>(session.getAttributes());
-        //向管道中写入数据
-        final PublishHandler writeHandler = attribute.getPublishHandler();
-        writeHandler.write(message.getPayload().array());
+        final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
+        publishVideoStreamProcessor.handleBinaryMessage(attribute, message.getPayload().array());
 
         /*FileInputStream in;
         try {
@@ -87,12 +74,8 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        final WebSocketAttribute<Object, PublishHandler> attribute = new WebSocketAttribute<>(session.getAttributes());
-        //关闭管道
-        PublishHandler handler = attribute.getPublishHandler();
-        if (Objects.nonNull(handler)) {
-            handler.close();
-        }
+        final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
+        publishVideoStreamProcessor.afterConnectionClosed(attribute);
         logger.info("client onclose[session={},status={}]", session, status);
     }
 }

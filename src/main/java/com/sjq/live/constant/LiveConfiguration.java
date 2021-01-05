@@ -15,13 +15,24 @@ public class LiveConfiguration {
     private static final String TRANSFORMED_STREAM_PROTOCOL = "https";
     public static final String ORIGIN_STREAM_PATH = "/originStream";
     public static final String TRANSFORMED_STREAM_PATH = "/transformedStream";
+    private static final String WEBSOCKET_PROTOCOL = "ws";
+    public static final String PUBLISH_PATH = "/ws/publishVideoStream";
+    public static final String SUBSCRIBE_PATH = "/ws/subscribeVideoStream";
 
     public String buildOriginStreamUrl(final String publishId) {
-        return String.format("%s://%s:%s%s?publishId=%s", ORIGIN_STREAM_PROTOCOL, serverIp, serverPort, ORIGIN_STREAM_PATH, publishId);
+        return String.format("%s://%s:%s%s?publishId=%s", ORIGIN_STREAM_PROTOCOL, serverIp, /*serverPort*/9999, ORIGIN_STREAM_PATH, publishId);
     }
 
     public String buildTransformedStreamUrl(final String publishId) {
-        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, serverPort, TRANSFORMED_STREAM_PATH, publishId);
+        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, /*serverPort*/9999, TRANSFORMED_STREAM_PATH, publishId);
+    }
+
+    public String buildWebsocketPublishUrl() {
+        return String.format("%s://%s:%s%s", WEBSOCKET_PROTOCOL, serverIp, serverPort, PUBLISH_PATH);
+    }
+
+    public String buildWebsocketSubscribeUrl() {
+        return String.format("%s://%s:%s%s", WEBSOCKET_PROTOCOL, serverIp, serverPort, SUBSCRIBE_PATH);
     }
 
     public Integer getServerPort() {

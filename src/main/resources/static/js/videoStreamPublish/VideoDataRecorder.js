@@ -63,7 +63,7 @@
             let _self = this;
             //视频数据录制
             if (this._defaultParam.dataHandler) {
-                let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm',audioBitsPerSecond: 1280,videoBitsPerSecond: 5000,});
+                let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm',audioBitsPerSecond: 250,videoBitsPerSecond: 1000,});
                 this._defaultParam.recorder = recorder;
                 recorder.start(1);
                 recorder.addEventListener('dataavailable', function (e) {

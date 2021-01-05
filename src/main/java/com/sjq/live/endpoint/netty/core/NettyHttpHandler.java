@@ -7,9 +7,11 @@ import com.sjq.live.support.netty.NettyOutputStreamProcessor;
 import com.sjq.live.utils.IpAddressUtils;
 import com.sjq.live.utils.NettyUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.FastThreadLocal;
@@ -55,6 +57,9 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         } else if (msg instanceof LastHttpContent) {
             LastHttpContent lastHttpContent = (LastHttpContent) msg;
             processLastHttpContent(lastHttpContent, ctx);
+        } else if (msg instanceof WebSocketFrame) {
+            WebSocketFrame webSocketFrame = (WebSocketFrame) msg;
+
         }
     }
 
@@ -86,35 +91,74 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
         final List<String> publishIds = queryStringDecoder.parameters().get("publishId");
         final String path = new URI(request.uri()).getPath();
+        HttpHeaders headers = request.headers();
         final ByteBuf content = request instanceof DefaultFullHttpRequest ? ((DefaultFullHttpRequest)request).content() : null;
 
         try {
-            //注册endPoint
-            NettyEndPointRegister.MethodInvokerHandler methodInvokerHandler = NettyEndPointRegister.match(path, HttpMethod.resolve(request.method().name()));
-            if (Objects.isNull(methodInvokerHandler)) {//返回404
-                NettyUtils.writeHttpNotFoundResponse(ctx);
-                return;
-            }
-
-            //保存请求数据
-            THREAD_LOCAL.remove();
-            NettyRequestParam nettyRequestParam = THREAD_LOCAL.get();
-            nettyRequestParam.setPublishId(CollectionUtils.isEmpty(publishIds) ? null : publishIds.get(0));
-            nettyRequestParam.setPath(path);
-            nettyRequestParam.setChunkedReq(StringUtils.equals(request.headers().get(HttpHeaderNames.TRANSFER_ENCODING), HttpHeaderValues.CHUNKED));
-            nettyRequestParam.setMethodInvokerHandler(methodInvokerHandler);
-
-            if (nettyRequestParam.isChunkedReq()) {
-                //如果是chunked请求,提前调用
-                processChunkedRequest(ctx, nettyRequestParam, methodInvokerHandler);
-            } else if (request instanceof DefaultFullHttpRequest) {
-                //如果是个完成请求，则直接调用
-                processFullHttpRequest(nettyRequestParam, ctx);
+            if (StringUtils.equals("websocket", request.headers().get("Upgrade"))) {//websocket 请求
+                processWebsocketRequest(request, ctx.channel());
+            } else {
+                processNormalHttpRequest(ctx, path, request.method().name(), publishIds, headers, request instanceof DefaultFullHttpRequest);
             }
         } finally {
             if (Objects.nonNull(content)) {
                 ReferenceCountUtil.release(content);
             }
+        }
+    }
+
+    private void processWebsocketRequest(DefaultHttpRequest req, Channel channel) {
+        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
+                "ws://localhost:8081/websocket", null, false);
+        WebSocketServerHandshaker handshake = wsFactory.newHandshaker(req);
+        if (handshake == null) {
+            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(channel);
+        } else {
+            handshake.handshake(channel, req);
+        }
+    }
+
+    private void processWebSocketFrame(WebSocketFrame frame, ChannelHandlerContext ctx){
+        // 判断是否关闭链路的指令
+        if (frame instanceof CloseWebSocketFrame) {
+            //handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+            return;
+        }
+        // 判断是否ping消息
+        if (frame instanceof PingWebSocketFrame) {
+            ctx.channel().write(
+                    new PongWebSocketFrame(frame.content().retain()));
+            return;
+        }
+    }
+
+    private void processNormalHttpRequest(ChannelHandlerContext ctx,
+                                          String path,
+                                          String httpMethod,
+                                          List<String> publishIds,
+                                          HttpHeaders headers,
+                                          boolean isFullHttpRequest) {
+        //注册endPoint
+        NettyEndPointRegister.MethodInvokerHandler methodInvokerHandler = NettyEndPointRegister.match(path, HttpMethod.resolve(httpMethod));
+        if (Objects.isNull(methodInvokerHandler)) {//返回404
+            NettyUtils.writeHttpNotFoundResponse(ctx);
+            return;
+        }
+
+        //保存请求数据
+        THREAD_LOCAL.remove();
+        NettyRequestParam nettyRequestParam = THREAD_LOCAL.get();
+        nettyRequestParam.setPublishId(CollectionUtils.isEmpty(publishIds) ? null : publishIds.get(0));
+        nettyRequestParam.setPath(path);
+        nettyRequestParam.setChunkedReq(StringUtils.equals(headers.get(HttpHeaderNames.TRANSFER_ENCODING), HttpHeaderValues.CHUNKED));
+        nettyRequestParam.setMethodInvokerHandler(methodInvokerHandler);
+
+        if (nettyRequestParam.isChunkedReq()) {
+            //如果是chunked请求,提前调用
+            processChunkedRequest(ctx, nettyRequestParam, methodInvokerHandler);
+        } else if (isFullHttpRequest) {
+            //如果是个完成请求，则直接调用
+            processFullHttpRequest(nettyRequestParam, ctx);
         }
     }
 
