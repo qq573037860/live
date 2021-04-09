@@ -1,10 +1,12 @@
-package com.sjq.live.service;
+package com.sjq.live.endpoint.original.websocket.bootstrap;
 
+import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
 import com.sjq.live.model.WebSocketAttribute;
 import com.sjq.live.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import java.util.Map;
  * Created by shenjq on 2019/12/2
  */
 @Component
+@ConditionalOnBean(OriginalEndPointSwitch.class)
 public class WebSocketInterceptor implements HandshakeInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketInterceptor.class);
@@ -27,7 +30,7 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
 
         // 获得请求参数
         final WebSocketAttribute urlParam = new WebSocketAttribute(HttpUtils.decodeParamMap(request.getURI().getQuery()));
-        final WebSocketAttribute<String, String> sessionAttributeMap = new WebSocketAttribute<>(map);
+        final WebSocketAttribute sessionAttributeMap = new WebSocketAttribute(map);
 
         String userId = urlParam.getUserId();
         if (StringUtils.isEmpty(userId)) {

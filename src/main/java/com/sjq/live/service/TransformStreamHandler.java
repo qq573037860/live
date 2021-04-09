@@ -4,7 +4,7 @@ import com.sjq.live.model.LiveException;
 import com.sjq.live.model.OperateResponse;
 import com.sjq.live.support.*;
 
-public interface TransformStream {
+public interface TransformStreamHandler {
 
     OperateResponse<PublishHandler> publish(String publishId) throws LiveException;
 

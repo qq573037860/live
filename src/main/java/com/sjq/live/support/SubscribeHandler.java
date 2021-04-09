@@ -13,7 +13,7 @@ public class SubscribeHandler {
     }
 
     public void unSubscribe() {
-        streamDistributeHandler.destory();
+        streamDistributeHandler.destroy();
     }
 
 }

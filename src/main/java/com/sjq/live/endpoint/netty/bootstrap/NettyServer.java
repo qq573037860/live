@@ -1,30 +1,34 @@
-package com.sjq.live.endpoint.netty.core;
+package com.sjq.live.endpoint.netty.bootstrap;
 
 import com.sjq.live.constant.LiveConfiguration;
-import com.sjq.live.endpoint.TransformStreamEndpointHook;
+import com.sjq.live.endpoint.netty.NettyEndPointSwitch;
 import com.sjq.live.utils.NettyEventLoopFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.util.concurrent.DefaultEventExecutor;
+import io.netty.util.concurrent.EventExecutor;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+@Component
+@ConditionalOnBean(NettyEndPointSwitch.class)
+public class NettyServer implements InitializingBean {
 
-public class NettyHttpServer {
+    private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyHttpServer.class);
-
+    @Autowired
     private LiveConfiguration liveConfiguration;
 
-    public NettyHttpServer(LiveConfiguration liveConfiguration) {
-        this.liveConfiguration = liveConfiguration;
-
+    @Override
+    public void afterPropertiesSet() throws Exception {
         NettyEndPointRegister.register();
         openHttpServer();
     }
@@ -45,10 +49,20 @@ public class NettyHttpServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
+
+                        /*ChannelPipeline p = ch.pipeline();
+                        EventExecutor e1 = new DefaultEventExecutor(16);
+                        EventExecutor e2 = new DefaultEventExecutor(8);
+
+                        p.addLast(new MyProtocolCodec());
+                        p.addLast(e1, new MyDatabaseAccessingHandler());
+                        p.addLast(e2, new MyHardDiskAccessingHandler());*/
+
                         ch.pipeline()
                             .addLast(new HttpServerCodec())
                             //.addLast("httpAggregator",new HttpObjectAggregator(1024*1024)) // http 消息聚合器(解析body中的数据)
-                            .addLast(new NettyHttpHandler());
+                            .addLast()
+                            .addLast(new NettyHandler());
                     }
                 });
         // bind

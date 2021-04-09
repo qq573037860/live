@@ -1,4 +1,4 @@
-package com.sjq.live.endpoint.netty.core;
+package com.sjq.live.endpoint.netty.bootstrap;
 
 import com.sjq.live.utils.proxy.ClassGenerator;
 import com.sjq.live.utils.proxy.ClassUtils;

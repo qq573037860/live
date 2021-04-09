@@ -1,6 +1,9 @@
-package com.sjq.live.service;
+package com.sjq.live.endpoint.original.websocket.bootstrap;
 
+import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
+import com.sjq.live.endpoint.original.websocket.AbstractBinaryWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -16,6 +19,7 @@ import java.util.Optional;
  */
 @Configuration
 @EnableWebSocket
+@ConditionalOnBean(OriginalEndPointSwitch.class)
 public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired

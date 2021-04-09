@@ -1,11 +1,12 @@
 package com.sjq.live.model;
 
-import com.sjq.live.endpoint.netty.core.NettyEndPointRegister;
 import com.sjq.live.support.netty.NettyInputStreamProcessor;
 
-public class NettyRequestParam {
+import java.util.Map;
 
-    private String publishId;
+public class NettyHttpRequest {
+
+    private Map<String, Object> params;
 
     private String path;
 
@@ -13,14 +14,12 @@ public class NettyRequestParam {
 
     private NettyInputStreamProcessor.ChunkDataHandler chunkDataHandler;
 
-    private NettyEndPointRegister.MethodInvokerHandler methodInvokerHandler;
-
-    public String getPublishId() {
-        return publishId;
+    public Map<String, Object> getParams() {
+        return params;
     }
 
-    public void setPublishId(String publishId) {
-        this.publishId = publishId;
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 
     public String getPath() {
@@ -45,13 +44,5 @@ public class NettyRequestParam {
 
     public void setChunkDataHandler(NettyInputStreamProcessor.ChunkDataHandler chunkDataHandler) {
         this.chunkDataHandler = chunkDataHandler;
-    }
-
-    public NettyEndPointRegister.MethodInvokerHandler getMethodInvokerHandler() {
-        return methodInvokerHandler;
-    }
-
-    public void setMethodInvokerHandler(NettyEndPointRegister.MethodInvokerHandler methodInvokerHandler) {
-        this.methodInvokerHandler = methodInvokerHandler;
     }
 }

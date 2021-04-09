@@ -20,9 +20,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class DefaultTransformStream implements TransformStream {
+public class DefaultTransformStreamHandler implements TransformStreamHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultTransformStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultTransformStreamHandler.class);
 
     @Autowired
     private LiveConfiguration liveConfiguration;
@@ -78,7 +78,7 @@ public class DefaultTransformStream implements TransformStream {
         }
 
         //设置销毁回调方法
-        handler.setDestoryCallBack(id -> {
+        handler.setDestroyCallBack(id -> {
             DistributeStreamProcessor task = distributeStreamMap.get(subscribeId);
             if (Objects.nonNull(task)) {
                 task.removeSubscribeById(id);

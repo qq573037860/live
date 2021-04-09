@@ -1,5 +1,6 @@
 package com.sjq.live.support.netty;
 
+import com.sjq.live.model.NettyHttpContext;
 import com.sjq.live.support.OutputStreamProcessor;
 import com.sjq.live.utils.NettyUtils;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,10 +10,10 @@ public class NettyOutputStreamProcessor extends OutputStreamProcessor {
 
     private final ChannelHandlerContext ctx;
 
-    public NettyOutputStreamProcessor(final ChannelHandlerContext ctx) {
-        Assert.notNull(ctx, "ChannelHandlerContext不能为空");
+    public NettyOutputStreamProcessor(final NettyHttpContext request) {
+        Assert.notNull(request, "NettyRequest不能为空");
 
-        this.ctx = ctx;
+        this.ctx = request.getCtx();
         //返回一个HttpChunk的开头
         NettyUtils.writeHttpChunkResponse(ctx);
     }

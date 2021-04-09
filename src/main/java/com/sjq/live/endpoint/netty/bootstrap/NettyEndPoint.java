@@ -1,4 +1,4 @@
-package com.sjq.live.endpoint.netty.core;
+package com.sjq.live.endpoint.netty.bootstrap;
 
 import org.springframework.http.HttpMethod;
 
@@ -16,5 +16,6 @@ public @interface NettyEndPoint {
      * @return
      */
     HttpMethod method() default HttpMethod.GET;
+
 
 }

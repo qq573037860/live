@@ -1,11 +1,14 @@
-package com.sjq.live.service;
+package com.sjq.live.endpoint.original.websocket;
 
 import com.sjq.live.constant.LiveConfiguration;
-import com.sjq.live.support.PublishHandler;
+import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
+import com.sjq.live.service.VideoStreamHandler;
 import com.sjq.live.model.WebSocketAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -16,14 +19,16 @@ import org.springframework.web.socket.WebSocketSession;
  */
 
 @Component
-public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
+@ConditionalOnBean(OriginalEndPointSwitch.class)
+public class OriginalPublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublishVideoStreamEndpoint.class);
+    private static final Logger logger = LoggerFactory.getLogger(OriginalPublishVideoStreamEndpoint.class);
 
     @Autowired
-    private PublishVideoStreamProcessor publishVideoStreamProcessor;
+    @Qualifier("defaultPublishVideoStreamHandler")
+    private VideoStreamHandler videoStreamHandler;
 
-    public PublishVideoStreamEndpoint() {
+    public OriginalPublishVideoStreamEndpoint() {
         super(LiveConfiguration.PUBLISH_PATH);
     }
 
@@ -32,7 +37,7 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
         logger.info("client opened: " + session.toString());
 
         final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
-        publishVideoStreamProcessor.afterConnectionEstablished(attribute);
+        videoStreamHandler.afterConnectionEstablished(attribute);
 
         //handleBinaryMessage(session, null);
     }
@@ -45,7 +50,7 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
-        publishVideoStreamProcessor.handleBinaryMessage(attribute, message.getPayload().array());
+        videoStreamHandler.handleBinaryMessage(attribute, message.getPayload().array());
 
         /*FileInputStream in;
         try {
@@ -75,7 +80,7 @@ public class PublishVideoStreamEndpoint extends AbstractBinaryWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
-        publishVideoStreamProcessor.afterConnectionClosed(attribute);
+        videoStreamHandler.afterConnectionClosed(attribute);
         logger.info("client onclose[session={},status={}]", session, status);
     }
 }

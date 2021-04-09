@@ -1,4 +1,4 @@
-package com.sjq.live.service;
+package com.sjq.live.endpoint.original.websocket;
 
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 

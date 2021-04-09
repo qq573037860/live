@@ -8,7 +8,7 @@ public abstract class AbstractStreamDistributeHandler {
     private String id;
     private volatile boolean isFirst = true;
 
-    private Consumer<String> destoryCallBack;
+    private Consumer<String> destroyCallBack;
 
     protected AbstractStreamDistributeHandler() {
         this.id = UUID.randomUUID().toString();
@@ -42,18 +42,18 @@ public abstract class AbstractStreamDistributeHandler {
         onData(bytes);
     }
 
-    public void destory() {
-        if (Objects.nonNull(destoryCallBack)) {
-            destoryCallBack.accept(id);
+    public void destroy() {
+        if (Objects.nonNull(destroyCallBack)) {
+            destroyCallBack.accept(id);
         }
     }
 
-    public Consumer<String> getDestoryCallBack() {
-        return destoryCallBack;
+    public Consumer<String> getDestroyCallBack() {
+        return destroyCallBack;
     }
 
-    public void setDestoryCallBack(Consumer<String> destoryCallBack) {
-        this.destoryCallBack = destoryCallBack;
+    public void setDestroyCallBack(Consumer<String> destroyCallBack) {
+        this.destroyCallBack = destroyCallBack;
     }
 
     public String getId() {

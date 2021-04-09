@@ -2,22 +2,28 @@ package com.sjq.live.service;
 
 import com.sjq.live.model.OperateResponse;
 import com.sjq.live.model.WebSocketAttribute;
+import com.sjq.live.support.AbstractStreamDistributeHandler;
 import com.sjq.live.support.PublishHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-@Service
-public class DefaultPublishVideoStreamProcessor implements PublishVideoStreamProcessor {
+@Service("defaultPublishVideoStreamHandler")
+public class DefaultPublishVideoStreamHandler implements VideoStreamHandler {
 
     @Autowired
-    private TransformStream transformStream;
+    private TransformStreamHandler transformStreamHandler;
+
+    @Override
+    public void afterConnectionEstablished(WebSocketAttribute attribute, AbstractStreamDistributeHandler handler) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public void afterConnectionEstablished(final WebSocketAttribute attribute) {
         //获取写入流句柄
-        final OperateResponse<PublishHandler> operateResponse = transformStream.publish(attribute.getPublishId());
+        final OperateResponse<PublishHandler> operateResponse = transformStreamHandler.publish(attribute.getPublishId());
         if (operateResponse.isSuccess()) {
             attribute.setPublishHandler(operateResponse.getData());
         }

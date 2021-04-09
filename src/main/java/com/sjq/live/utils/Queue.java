@@ -1,5 +1,7 @@
 package com.sjq.live.utils;
 
+import io.netty.util.internal.shaded.org.jctools.queues.ConcurrentCircularArrayQueue;
+
 import java.util.concurrent.CountDownLatch;
 
 /**

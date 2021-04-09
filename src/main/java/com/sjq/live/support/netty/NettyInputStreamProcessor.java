@@ -1,6 +1,7 @@
 package com.sjq.live.support.netty;
 
 import com.sjq.live.model.LiveException;
+import com.sjq.live.model.NettyHttpContext;
 import com.sjq.live.support.InputStreamProcessor;
 import com.sjq.live.utils.NettyUtils;
 import com.sjq.live.utils.Queue;
@@ -15,10 +16,9 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
 
     private final ChannelHandlerContext ctx;
 
-    public NettyInputStreamProcessor(ChunkDataHandler chunkDataHandler,
-                                     ChannelHandlerContext ctx) {
-        this.chunkDataHandler = chunkDataHandler;
-        this.ctx = ctx;
+    public NettyInputStreamProcessor(final NettyHttpContext request) {
+        this.chunkDataHandler = request.getHttpRequest().getChunkDataHandler();
+        this.ctx = request.getCtx();
     }
 
     @Override

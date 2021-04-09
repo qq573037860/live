@@ -1,10 +1,12 @@
-package com.sjq.live.endpoint.original;
+package com.sjq.live.endpoint.original.http;
 
 import com.sjq.live.constant.LiveConfiguration;
-import com.sjq.live.endpoint.AbstractTransformStreamEndpointHook;
+import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
+import com.sjq.live.service.TransformStreamHandler;
 import com.sjq.live.support.original.ServletInputStreamProcessor;
 import com.sjq.live.support.original.ServletOutputStreamProcessor;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -12,7 +14,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Controller
-public class OriginalTransformStreamEndpoint extends AbstractTransformStreamEndpointHook {
+@ConditionalOnBean(OriginalEndPointSwitch.class)
+public class OriginalTransformStreamEndpoint{
+
+    @Autowired
+    private TransformStreamHandler transformStreamHandler;
 
     /**
      * 原始流(供ffmpeg调用)
@@ -21,8 +27,7 @@ public class OriginalTransformStreamEndpoint extends AbstractTransformStreamEndp
      */
     @RequestMapping(LiveConfiguration.ORIGIN_STREAM_PATH)
     public void originStream(HttpServletResponse response, String publishId) throws Exception {
-        response.getOutputStream().flush();
-        originStreamReach(publishId, new ServletOutputStreamProcessor(response.getOutputStream()));
+        transformStreamHandler.processOriginalStream(publishId, new ServletOutputStreamProcessor(response.getOutputStream()));
     }
 
     /**
@@ -32,7 +37,7 @@ public class OriginalTransformStreamEndpoint extends AbstractTransformStreamEndp
      */
     @RequestMapping(LiveConfiguration.TRANSFORMED_STREAM_PATH)
     public void transformedStream(HttpServletRequest request, HttpServletResponse response, String publishId) throws Exception {
-        transformedStreamReach(publishId, new ServletInputStreamProcessor(request.getInputStream()));
+        transformStreamHandler.processTransformedStream(publishId, new ServletInputStreamProcessor(request.getInputStream()));
         response.setStatus(200);
     }
 }
