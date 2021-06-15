@@ -1,6 +1,5 @@
 package com.sjq.live.support.netty;
 
-import com.sjq.live.endpoint.netty.bootstrap.AbstractMethodInvokerHandler;
 import com.sjq.live.model.NettyHttpRequest;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;

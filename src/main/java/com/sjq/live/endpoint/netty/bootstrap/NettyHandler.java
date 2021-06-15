@@ -29,14 +29,14 @@ import java.util.Objects;
 
 public class NettyHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyHandler.class);
+    /*private static final Logger logger = LoggerFactory.getLogger(NettyHandler.class);
 
-    /*private static final FastThreadLocal<NettyRequestParam> THREAD_LOCAL = new FastThreadLocal<NettyRequestParam>() {
+    *//*private static final FastThreadLocal<NettyRequestParam> THREAD_LOCAL = new FastThreadLocal<NettyRequestParam>() {
         @Override
         protected NettyRequestParam initialValue() {
             return new NettyRequestParam();
         }
-    };*/
+    };*//*
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -221,5 +221,5 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         } finally {
             ReferenceCountUtil.release(byteBuf);
         }
-    }
+    }*/
 }

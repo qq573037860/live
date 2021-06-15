@@ -4,7 +4,7 @@ import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
 import com.sjq.live.service.VideoStreamHandler;
 import com.sjq.live.support.AbstractStreamDistributeHandler;
-import com.sjq.live.model.WebSocketAttribute;
+import com.sjq.live.model.RequestParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +37,13 @@ public class OriginalSubscribeVideoStreamEndpoint extends AbstractBinaryWebSocke
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        videoStreamHandler.afterConnectionEstablished(new WebSocketAttribute(session.getAttributes()), new StreamDistributeHandler(session));
+        videoStreamHandler.afterConnectionEstablished(new RequestParam(session.getAttributes()), new StreamDistributeHandler(session));
         logger.info("client opened: " + session.toString());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        videoStreamHandler.afterConnectionEstablished(new WebSocketAttribute(session.getAttributes()));
+        videoStreamHandler.afterConnectionEstablished(new RequestParam(session.getAttributes()));
         logger.info("client onclose：" + session.toString());
     }
 

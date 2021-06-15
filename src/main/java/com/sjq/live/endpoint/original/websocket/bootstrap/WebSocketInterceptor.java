@@ -1,7 +1,7 @@
 package com.sjq.live.endpoint.original.websocket.bootstrap;
 
 import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
-import com.sjq.live.model.WebSocketAttribute;
+import com.sjq.live.model.RequestParam;
 import com.sjq.live.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,8 +29,8 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
         logger.info("beforeHandshake, uri:{}", request.getURI().toString());
 
         // 获得请求参数
-        final WebSocketAttribute urlParam = new WebSocketAttribute(HttpUtils.decodeParamMap(request.getURI().getQuery()));
-        final WebSocketAttribute sessionAttributeMap = new WebSocketAttribute(map);
+        final RequestParam urlParam = new RequestParam(HttpUtils.decodeParamMap(request.getURI().getQuery()));
+        final RequestParam sessionAttributeMap = new RequestParam(map);
 
         String userId = urlParam.getUserId();
         if (StringUtils.isEmpty(userId)) {

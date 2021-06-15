@@ -1,7 +1,7 @@
 package com.sjq.live.service;
 
 import com.sjq.live.model.OperateResponse;
-import com.sjq.live.model.WebSocketAttribute;
+import com.sjq.live.model.RequestParam;
 import com.sjq.live.support.AbstractStreamDistributeHandler;
 import com.sjq.live.support.PublishHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +16,12 @@ public class DefaultPublishVideoStreamHandler implements VideoStreamHandler {
     private TransformStreamHandler transformStreamHandler;
 
     @Override
-    public void afterConnectionEstablished(WebSocketAttribute attribute, AbstractStreamDistributeHandler handler) {
+    public void afterConnectionEstablished(RequestParam attribute, AbstractStreamDistributeHandler handler) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void afterConnectionEstablished(final WebSocketAttribute attribute) {
+    public void afterConnectionEstablished(final RequestParam attribute) {
         //获取写入流句柄
         final OperateResponse<PublishHandler> operateResponse = transformStreamHandler.publish(attribute.getPublishId());
         if (operateResponse.isSuccess()) {
@@ -30,7 +30,7 @@ public class DefaultPublishVideoStreamHandler implements VideoStreamHandler {
     }
 
     @Override
-    public void handleBinaryMessage(final WebSocketAttribute attribute,
+    public void handleBinaryMessage(final RequestParam attribute,
                                     final byte[] data) {
         //向管道中写入数据
         final PublishHandler writeHandler = attribute.getPublishHandler();
@@ -38,7 +38,7 @@ public class DefaultPublishVideoStreamHandler implements VideoStreamHandler {
     }
 
     @Override
-    public void afterConnectionClosed(final WebSocketAttribute attribute) {
+    public void afterConnectionClosed(final RequestParam attribute) {
         //关闭管道
         PublishHandler handler = attribute.getPublishHandler();
         if (Objects.nonNull(handler)) {

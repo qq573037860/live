@@ -3,10 +3,10 @@ package com.sjq.live.endpoint.netty.bootstrap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.sjq.live.endpoint.netty.websocket.NettyPublishVideoStreamEndpointEndPoint;
 import com.sjq.live.model.LiveException;
 import com.sjq.live.support.spring.SpringBeanUtil;
 import com.sjq.live.utils.PackageScanner;
+import com.sjq.live.utils.proxy.Wrapper;
 import org.springframework.asm.Type;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
@@ -19,12 +19,20 @@ import java.util.Set;
 
 public class NettyEndPointRegister {
 
-    private static final Map<String, AbstractMethodInvokerHandler> METHOD_INVOKER_HOLDER_MAP = Maps.newHashMap();
+    /**
+     * url与handler的映衬MAP
+     */
+    private static final Map<String, Object> METHOD_INVOKER_HOLDER_MAP = Maps.newHashMap();
+
+    /**
+     * 实现NettyWebsocketEndPointHandler的方法SET
+     */
+    private static final Class<NettyWebsocketEndPointHandler> WEBSOCKET_END_POINT_HANDLER_CLASS = NettyWebsocketEndPointHandler.class;
     private static final Set<String> WS_HANDLER_METHOD_DESCRIPTION_SET = Sets.newHashSet();
     private static final String METHOD_DESCRIPTION_FORMAT = "%s#%s";
 
     static {
-        for (Method method : NettyWebsocketEndPointHandler.class.getMethods()) {
+        for (Method method : WEBSOCKET_END_POINT_HANDLER_CLASS.getMethods()) {
             WS_HANDLER_METHOD_DESCRIPTION_SET.add(getMethodDescription(method));
         }
     }
@@ -37,10 +45,6 @@ public class NettyEndPointRegister {
         return Objects.isNull(method) ? null : String.format("%s_%s", path, method.name());
     }
 
-    private static String buildKey(String path, String methodDescription) {
-        return String.format("%s_%s", path, methodDescription);
-    }
-
     public static <T> T match(String path, HttpMethod method) {
         return (T) METHOD_INVOKER_HOLDER_MAP.get(buildKey(path, method));
     }
@@ -49,9 +53,11 @@ public class NettyEndPointRegister {
         return (T) METHOD_INVOKER_HOLDER_MAP.get(path);
     }
 
-    private static boolean isImplementNettyWebsocketInterface(Class cls) {
-        for (Class<?> anInterface : NettyPublishVideoStreamEndpointEndPoint.class.getInterfaces()) {
-            return anInterface == NettyWebsocketEndPointHandler.class;
+    private static boolean isImplementNettyWebsocketInterface(Class<?> cls) {
+        for (Class<?> anInterface : cls.getInterfaces()) {
+            if (anInterface == WEBSOCKET_END_POINT_HANDLER_CLASS) {
+                return true;
+            }
         }
         return false;
     }
@@ -61,10 +67,11 @@ public class NettyEndPointRegister {
         final List<Class> classes = PackageScanner.scanClassByPackagePathAndAnnotation("", new Class[]{NettyEndPoint.class});
         //解析类信息
         for (Class<?> cls : classes) {
-            //匹配需要绑定的方法
+            //是否是实现WebsocketEndPointHandler
             boolean isImplementNettyWebsocketInterface = isImplementNettyWebsocketInterface(cls);
-            NettyEndPoint clsAnnotation = cls.getAnnotation(NettyEndPoint.class);
-            String prefixPath = clsAnnotation.path();
+
+            //匹配需要绑定的方法
+            String prefixPath = cls.getAnnotation(NettyEndPoint.class).path();
             List<Method> methods = Lists.newArrayList();
             Map<String, Method> endPointPathToMethodMap = Maps.newHashMap();
             for (Method method : cls.getMethods()) {
@@ -76,8 +83,7 @@ public class NettyEndPointRegister {
                     endPointPathToMethodMap.put(methodAnnotation.path(), method);
                     methods.add(method);
                 }
-                if (isImplementNettyWebsocketInterface
-                        && WS_HANDLER_METHOD_DESCRIPTION_SET.contains(getMethodDescription(method))) {
+                if (isImplementNettyWebsocketInterface && WS_HANDLER_METHOD_DESCRIPTION_SET.contains(getMethodDescription(method))) {
                     methods.add(method);
                 }
             }
@@ -86,24 +92,18 @@ public class NettyEndPointRegister {
                 continue;
             }
 
-            //实例化
-            Object instance = getInstance(cls);
             //InvokerHandler绑定
             for (Method method : methods) {
                 NettyEndPoint methodAnnotation = method.getAnnotation(NettyEndPoint.class);
                 if (Objects.nonNull(methodAnnotation)) {
                     String key = buildKey(prefixPath + methodAnnotation.path(), methodAnnotation.method());
-                    METHOD_INVOKER_HOLDER_MAP.put(key, new MethodInvokerHandler(EndpointWrapper.makeWrapper(cls, methods.toArray(new Method[0])), instance, method.getName(), method.getParameterTypes()));
+                    METHOD_INVOKER_HOLDER_MAP.put(key, new NettyHttpEndPointHandlerProxy(Wrapper.makeWrapper(cls, methods.toArray(new Method[0])),
+                            SpringBeanUtil.getBean(cls), method.getName(), method.getParameterTypes()));
                 }
             }
             if (isImplementNettyWebsocketInterface) {
-                METHOD_INVOKER_HOLDER_MAP.put(prefixPath, new WebsocketMethodInvokerEndPointHandler(instance));
+                METHOD_INVOKER_HOLDER_MAP.put(prefixPath, new NettyWebsocketEndPointHandlerProxy(SpringBeanUtil.getBean((Class<NettyWebsocketEndPointHandler>)cls)));
             }
         }
-    }
-
-    private static Object getInstance(Class<?> cls) {
-        //SpringBeanUtil.registerBean(cls);
-        return SpringBeanUtil.getBean(cls);
     }
 }

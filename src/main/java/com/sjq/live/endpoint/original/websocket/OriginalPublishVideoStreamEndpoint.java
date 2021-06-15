@@ -3,7 +3,7 @@ package com.sjq.live.endpoint.original.websocket;
 import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
 import com.sjq.live.service.VideoStreamHandler;
-import com.sjq.live.model.WebSocketAttribute;
+import com.sjq.live.model.RequestParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +35,7 @@ public class OriginalPublishVideoStreamEndpoint extends AbstractBinaryWebSocketH
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         logger.info("client opened: " + session.toString());
-
-        final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
-        videoStreamHandler.afterConnectionEstablished(attribute);
-
+        videoStreamHandler.afterConnectionEstablished(new RequestParam(session.getAttributes()));
         //handleBinaryMessage(session, null);
     }
 
@@ -49,8 +46,7 @@ public class OriginalPublishVideoStreamEndpoint extends AbstractBinaryWebSocketH
      */
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
-        videoStreamHandler.handleBinaryMessage(attribute, message.getPayload().array());
+        videoStreamHandler.handleBinaryMessage(new RequestParam(session.getAttributes()), message.getPayload().array());
 
         /*FileInputStream in;
         try {
@@ -79,8 +75,7 @@ public class OriginalPublishVideoStreamEndpoint extends AbstractBinaryWebSocketH
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        final WebSocketAttribute attribute = new WebSocketAttribute(session.getAttributes());
-        videoStreamHandler.afterConnectionClosed(attribute);
+        videoStreamHandler.afterConnectionClosed(new RequestParam(session.getAttributes()));
         logger.info("client onclose[session={},status={}]", session, status);
     }
 }

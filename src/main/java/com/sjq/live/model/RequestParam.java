@@ -6,11 +6,11 @@ import org.springframework.util.Assert;
 
 import java.util.Map;
 
-public class WebSocketAttribute {
+public class RequestParam {
 
     private final Map<String, Object> attributeMap;
 
-    public WebSocketAttribute(final Map<String, Object> attributeMap) {
+    public RequestParam(final Map<String, Object> attributeMap) {
         Assert.notNull(attributeMap, "attributeMap不能为空");
 
         this.attributeMap = attributeMap;

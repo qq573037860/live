@@ -1,8 +1,4 @@
-package com.sjq.live.endpoint.netty.bootstrap;
-
-import com.sjq.live.utils.proxy.ClassGenerator;
-import com.sjq.live.utils.proxy.ClassUtils;
-import com.sjq.live.utils.proxy.ReflectUtils;
+package com.sjq.live.utils.proxy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * EndPoint代理生成类
  */
-public abstract class EndpointWrapper {
+public abstract class Wrapper {
 
     private final static AtomicLong WRAPPER_CLASS_COUNTER = new AtomicLong(0);
 
@@ -27,7 +23,7 @@ public abstract class EndpointWrapper {
      */
     abstract public Object invokeMethod(Object instance, String mn, Class<?>[] types, Object[] args) throws NoSuchMethodException, InvocationTargetException;
 
-    public static EndpointWrapper makeWrapper(Class<?> c, Method[] methods) {
+    public static Wrapper makeWrapper(Class<?> c, Method[] methods) {
         if (c.isPrimitive()) {
             throw new IllegalArgumentException("Can not create wrapper for primitive type: " + c);
         }
@@ -86,13 +82,13 @@ public abstract class EndpointWrapper {
         // make class
         long id = WRAPPER_CLASS_COUNTER.getAndIncrement();
         ClassGenerator cc = ClassGenerator.newInstance(cl);
-        cc.setClassName((Modifier.isPublic(c.getModifiers()) ? EndpointWrapper.class.getName() : c.getName() + "$sw") + id);
-        cc.setSuperClass(EndpointWrapper.class);
+        cc.setClassName((Modifier.isPublic(c.getModifiers()) ? Wrapper.class.getName() : c.getName() + "$sw") + id);
+        cc.setSuperClass(Wrapper.class);
         cc.addDefaultConstructor();
         cc.addMethod(methodBuilders.toString());
         try {
             Class<?> wc = cc.toClass();
-            return (EndpointWrapper) wc.newInstance();
+            return (Wrapper) wc.newInstance();
         } catch (RuntimeException e) {
             throw e;
         } catch (Throwable e) {

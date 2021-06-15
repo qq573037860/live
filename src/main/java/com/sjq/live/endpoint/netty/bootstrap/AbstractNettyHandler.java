@@ -7,9 +7,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractNettyHttpHandler extends ChannelInboundHandlerAdapter {
+public abstract class AbstractNettyHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractNettyHttpHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractNettyHandler.class);
 
     protected abstract void doChannelInactive(ChannelHandlerContext ctx);
 
