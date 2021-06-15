@@ -28,12 +28,14 @@ public abstract class AbstractStreamDistributeHandler {
     public void send(final byte[] bytes,
                      final byte[] headerData,
                      final boolean isTagHeaderStart) {
-        if (isFirst) {//第一次发送的起始数据(包含flvHeader 和 keyFrames)
+        //第一次发送的起始数据(包含flvHeader 和 keyFrames)
+        if (isFirst) {
             synchronized (this) {
                 if (isFirst) {
                     isFirst = false;
                     onData(headerData);
-                    if (!isTagHeaderStart) {//要从一个tagHeader开始读数据
+                    //要从一个tagHeader开始读数据
+                    if (!isTagHeaderStart) {
                         return;
                     }
                 }

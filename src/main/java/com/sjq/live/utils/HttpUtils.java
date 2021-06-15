@@ -1,5 +1,6 @@
 package com.sjq.live.utils;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
@@ -40,7 +41,7 @@ public class HttpUtils {
             return Collections.emptyMap();
         }
 
-        Map<String, Object> mapRequest = new HashMap<>();
+        Map<String, Object> mapRequest = Maps.newHashMap();
         String[] arrSplit;
         //每个键值为一组 www.2cto.com
         arrSplit = strUrlParam.split("[&]");
@@ -52,7 +53,7 @@ public class HttpUtils {
                 //正确解析
                 mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
             } else {
-                if (arrSplitEqual[0] != "") {
+                if (StringUtils.isNotEmpty(arrSplitEqual[0])) {
                     //只有参数没有值，不加入
                     mapRequest.put(arrSplitEqual[0], "");
                 }

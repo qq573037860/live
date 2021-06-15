@@ -15,9 +15,10 @@ class PrintStream extends Thread {
         __is = is;
     }
 
+    @Override
     public void run() {
         try {
-            for (; ; ) {
+            for (; ;) {
                 int _ch = __is.read();
                 if (_ch == -1) {
                     break;

@@ -29,13 +29,14 @@ public class DefaultTransformStreamHandler implements TransformStreamHandler {
     @Autowired
     private StreamConverter streamConverter;
 
-    private static final Map<String, OutputStreamProcessor> outStreamMap = new ConcurrentHashMap<>();
-    private static final Map<String, DistributeStreamProcessor> distributeStreamMap = new ConcurrentHashMap<>();
-    private static final Map<String, Set<String>> subscribeUserIdsMap = new ConcurrentHashMap<>();
+    private static final Map<String, OutputStreamProcessor> OUT_STREAM_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, DistributeStreamProcessor> DISTRIBUTE_STREAM_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Set<String>> SUBSCRIBE_USER_IDS_MAP = new ConcurrentHashMap<>();
 
     @Override
     public OperateResponse<PublishHandler> publish(String publishId) throws LiveException {
-        if (outStreamMap.containsKey(publishId)) {//同一个流，只允许发布一次
+        //同一个流，只允许发布一次
+        if (OUT_STREAM_MAP.containsKey(publishId)) {
             return new OperateResponse<>(PublishEnum.DUPLICATE_PUBLISH);
         }
 
@@ -46,14 +47,14 @@ public class DefaultTransformStreamHandler implements TransformStreamHandler {
         //寻找输出流处理器
         OutputStreamProcessor out;
         do {
-            out = outStreamMap.get(publishId);
+            out = OUT_STREAM_MAP.get(publishId);
         } while (!Objects.nonNull(out));
 
         //返回并携带句柄
         return new OperateResponse<>(PublishEnum.SUCCESS, new PublishHandler(out, () -> {
             streamConverterHandler.destory();
-            outStreamMap.remove(publishId);
-            distributeStreamMap.remove(publishId);
+            OUT_STREAM_MAP.remove(publishId);
+            DISTRIBUTE_STREAM_MAP.remove(publishId);
         }));
     }
 
@@ -65,7 +66,7 @@ public class DefaultTransformStreamHandler implements TransformStreamHandler {
             throw new IllegalArgumentException("参数不能为空");
         }
 
-        Set<String> userIdSet = subscribeUserIdsMap.computeIfAbsent(subscribeId, v -> ConcurrentHashMap.newKeySet());
+        Set<String> userIdSet = SUBSCRIBE_USER_IDS_MAP.computeIfAbsent(subscribeId, v -> ConcurrentHashMap.newKeySet());
         if (userIdSet.contains(userId)) {
             return new OperateResponse<>(SubscribeEnum.SUBSCRIBED);
         }
@@ -79,7 +80,7 @@ public class DefaultTransformStreamHandler implements TransformStreamHandler {
 
         //设置销毁回调方法
         handler.setDestroyCallBack(id -> {
-            DistributeStreamProcessor task = distributeStreamMap.get(subscribeId);
+            DistributeStreamProcessor task = DISTRIBUTE_STREAM_MAP.get(subscribeId);
             if (Objects.nonNull(task)) {
                 task.removeSubscribeById(id);
             }
@@ -90,7 +91,7 @@ public class DefaultTransformStreamHandler implements TransformStreamHandler {
 
     private boolean addSubscribeHandler(final String subscribeId,
                                         final AbstractStreamDistributeHandler handler) {
-        DistributeStreamProcessor task = distributeStreamMap.get(subscribeId);
+        DistributeStreamProcessor task = DISTRIBUTE_STREAM_MAP.get(subscribeId);
         if (Objects.isNull(task)) {
             return false;
         }
@@ -102,7 +103,7 @@ public class DefaultTransformStreamHandler implements TransformStreamHandler {
     public void processOriginalStream(final String publishId,
                                       final OutputStreamProcessor streamProcessor) {
         //注册管道流
-        outStreamMap.put(publishId, streamProcessor);
+        OUT_STREAM_MAP.put(publishId, streamProcessor);
         //开始从管道中读取数据
         streamProcessor.processData();
         logger.info("[processOriginalStream] publishId:{}, originStream流关闭", publishId);
@@ -112,11 +113,11 @@ public class DefaultTransformStreamHandler implements TransformStreamHandler {
     public void processTransformedStream(final String publishId,
                                          final InputStreamProcessor streamProcessor) {
         //开启读取transformedStream流的线程
-        DistributeStreamProcessor processor = distributeStreamMap.get(publishId);
+        DistributeStreamProcessor processor = DISTRIBUTE_STREAM_MAP.get(publishId);
         if (Objects.isNull(processor)) {
             processor = new DistributeStreamProcessor(streamProcessor);
             //注册读流处理器
-            distributeStreamMap.put(publishId, processor);
+            DISTRIBUTE_STREAM_MAP.put(publishId, processor);
             //开始分发视频流数据
             processor.distribute();
 

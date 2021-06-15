@@ -6,5 +6,4 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(value = "stream.transport", havingValue = "original")
 public class OriginalEndPointSwitch {
-
 }

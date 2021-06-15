@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 public class Queue<T> {
 
     public static void main(String[] args) throws InterruptedException {
-        long total = 0l;
+        long total = 0L;
         for (int i = 0; i < 10; i++) {
             total += test();
         }
@@ -80,9 +80,9 @@ public class Queue<T> {
 
 
     public Queue(int preferCapacity) {
-        double pow = log2(Double.valueOf(preferCapacity));
+        double pow = log2(preferCapacity);
         double intValuePow = (long)pow + 0.0;
-        this.capacity = intValuePow == pow ? preferCapacity : Double.valueOf(Math.pow(2.0d, intValuePow + 1)).intValue();
+        this.capacity = Double.compare(intValuePow, pow) == 0 ? preferCapacity : Double.valueOf(Math.pow(2.0d, intValuePow + 1)).intValue();
         array = new Object[this.capacity];
         this.m = this.capacity - 1;
 

@@ -14,7 +14,7 @@ public class NettyHttpEndPointHandlerProxy implements NettyHttpEndPointHandler {
 
     private final ExecutorService poolExecutor;
 
-    private final SpringBeanUtil.BeanWrapper wrapper;
+    private final SpringBeanUtil.BeanWrapper instanceWrapper;
 
     private final Wrapper wrapper;
 
@@ -22,12 +22,12 @@ public class NettyHttpEndPointHandlerProxy implements NettyHttpEndPointHandler {
 
     private final Class<?>[] argsTypes;
 
-    public NettyHttpEndPointHandlerProxy(Wrapper endpointWrapper,
-                                         SpringBeanUtil.BeanWrapper wrapper,
+    public NettyHttpEndPointHandlerProxy(Wrapper wrapper,
+                                         SpringBeanUtil.BeanWrapper instanceWrapper,
                                          String methodName,
                                          Class<?>[] argsTypes) {
         this.wrapper = wrapper;
-        this.wrapper = endpointWrapper;
+        this.instanceWrapper = instanceWrapper;
         this.methodName = methodName;
         this.argsTypes = argsTypes;
         this.poolExecutor = new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors(),
@@ -38,7 +38,7 @@ public class NettyHttpEndPointHandlerProxy implements NettyHttpEndPointHandler {
     @Override
     public Object invoke(Object[] args) {
         try {
-            return wrapper.invokeMethod(wrapper.getBean(), methodName, argsTypes, args);
+            return wrapper.invokeMethod(instanceWrapper.getBean(), methodName, argsTypes, args);
         } catch (Exception e) {
             throw new LiveException(e);
         }
@@ -48,7 +48,7 @@ public class NettyHttpEndPointHandlerProxy implements NettyHttpEndPointHandler {
     public void invokeAsync(Object[] args) {
         poolExecutor.execute(() -> {
             try {
-                wrapper.invokeMethod(wrapper.getBean(), methodName, argsTypes, args);
+                wrapper.invokeMethod(instanceWrapper.getBean(), methodName, argsTypes, args);
             } catch (Exception e) {
                 throw new LiveException(e);
             }

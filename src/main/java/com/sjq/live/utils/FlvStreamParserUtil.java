@@ -24,6 +24,7 @@ public class FlvStreamParserUtil {
         do {
             byte[] data;
             while (Objects.isNull(data = in.read())) {
+                // noop
             }
             totalLen += data.length;
             //合并数据
@@ -92,12 +93,14 @@ public class FlvStreamParserUtil {
                 for (;;) {
                     //读取tagHeader
                     int tagHeaderNeedToRead;
-                    if ((tagHeaderNeedToRead = tagHeader.length - tagHeaderSize) > 0) {//tagHeader未读完
+                    //tagHeader未读完
+                    if ((tagHeaderNeedToRead = tagHeader.length - tagHeaderSize) > 0) {
                         int leftLength = len - tagHeaderIndex;
-                        int tagHeaderReadLength = leftLength < tagHeaderNeedToRead ? leftLength : tagHeaderNeedToRead;
+                        int tagHeaderReadLength = Math.min(leftLength, tagHeaderNeedToRead);
                         System.arraycopy(bytes, tagHeaderIndex, tagHeader, tagHeaderSize, tagHeaderReadLength);
                         tagHeaderSize += tagHeaderReadLength;
-                        if (tagHeader.length == tagHeaderSize) {//读完了
+                        //读完了
+                        if (tagHeader.length == tagHeaderSize) {
                             tagDataIndex = tagHeaderIndex + tagHeaderReadLength;
                             leftTagDataToRead = FlvUtils.getTagDataSize(tagHeader);
                             if (startReadKeyFrameTag) {
@@ -119,7 +122,7 @@ public class FlvStreamParserUtil {
 
                     //读取tagData
                     if (leftTagDataToRead > 0) {
-                        int readLength = len - tagDataIndex > leftTagDataToRead ? leftTagDataToRead : len - tagDataIndex;
+                        int readLength = Math.min(len - tagDataIndex, leftTagDataToRead);
                         byte[] tagData;
                         boolean isTagHeaderStartTemp = isTagHeaderStart;
                         if (isTagHeaderStart) {

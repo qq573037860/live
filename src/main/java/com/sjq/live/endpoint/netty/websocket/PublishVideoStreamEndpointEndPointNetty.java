@@ -31,8 +31,7 @@ public class PublishVideoStreamEndpointEndPointNetty implements NettyWebsocketEn
     @Override
     public boolean beforeHandshake(final NettyWebsocketContext context) {
         final RequestParam requestParam = new RequestParam(context.getRequest().getAttribute());
-        if (Objects.isNull(requestParam)
-                || StringUtils.isEmpty(requestParam.getUserId())
+        if (StringUtils.isEmpty(requestParam.getUserId())
                 || StringUtils.isEmpty(requestParam.getPublishId())) {
             return false;
         }

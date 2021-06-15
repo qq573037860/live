@@ -107,7 +107,7 @@ public class PackageScanner {
                             continue;
                         }
                         //转换成com.sjq.rpc这种格式,并加载class
-                        Class cls = cl.loadClass(path.substring(1, path.length() - 6).replace(File.separator, "."));
+                        Class<?> cls = cl.loadClass(path.substring(1, path.length() - 6).replace(File.separator, "."));
                         //过滤
                         if (filter.apply(cls)) {
                             classes.add(cls);

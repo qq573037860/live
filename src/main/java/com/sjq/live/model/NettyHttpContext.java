@@ -1,6 +1,5 @@
 package com.sjq.live.model;
 
-import com.sjq.live.support.netty.NettyChannelAttribute;
 import io.netty.channel.ChannelHandlerContext;
 
 public class NettyHttpContext {

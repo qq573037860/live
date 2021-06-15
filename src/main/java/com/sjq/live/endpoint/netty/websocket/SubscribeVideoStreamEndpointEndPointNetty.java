@@ -33,9 +33,8 @@ public class SubscribeVideoStreamEndpointEndPointNetty implements NettyWebsocket
     @Override
     public boolean beforeHandshake(final NettyWebsocketContext context) {
         final RequestParam params = new RequestParam(context.getRequest().getAttribute());
-        if (Objects.isNull(params)
-                || StringUtils.isEmpty(params.getUserId())
-                && StringUtils.isEmpty(params.getSubscribeId())) {
+        if (StringUtils.isEmpty(params.getUserId())
+                || StringUtils.isEmpty(params.getSubscribeId())) {
             return false;
         }
         return true;

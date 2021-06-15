@@ -23,13 +23,12 @@ public class IpAddressUtils {
                 NetworkInterface netInterface = allNetInterfaces.nextElement();
                 if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
                     continue;
-                } else {
-                    Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
-                    while (addresses.hasMoreElements()) {
-                        ip = addresses.nextElement();
-                        if (ip instanceof Inet4Address) {
-                            return ip.getHostAddress();
-                        }
+                }
+                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    ip = addresses.nextElement();
+                    if (ip instanceof Inet4Address) {
+                        return ip.getHostAddress();
                     }
                 }
             }

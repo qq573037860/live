@@ -66,7 +66,8 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
         websocketRequest.setPath(request.uri());
         context = new NettyWebsocketContext(ctx, websocketRequest);
 
-        if (NettyUtils.isWebsocketRequest(request.headers())) {//websocket 请求
+        //websocket 请求
+        if (NettyUtils.isWebsocketRequest(request.headers())) {
             try {
                 processWebsocketRequest(path, request, ctx);
             } finally {
@@ -82,7 +83,9 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
                                          final ChannelHandlerContext ctx) {
         //注册endPoint
         methodInvokerHandler = NettyEndPointRegister.match(path);
-        if (Objects.isNull(methodInvokerHandler)) {//返回404
+
+        //返回404
+        if (Objects.isNull(methodInvokerHandler)) {
             NettyUtils.writeHttpNotFoundResponse(ctx);
             return;
         }
@@ -90,7 +93,8 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
 
         //握手
         if (methodInvokerHandler.beforeHandshake(context)) {
-            WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(buildUrl(path), null, false);
+            String webSocketURL = String.format("%s://%s:%s%s", LiveConfiguration.WEBSOCKET_PROTOCOL, configuration.getServerIp(), configuration.getServerPort(), path);
+            WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(webSocketURL, null, false);
             handshake = wsFactory.newHandshaker(request);
             if (Objects.isNull(handshake)) {
                 WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());

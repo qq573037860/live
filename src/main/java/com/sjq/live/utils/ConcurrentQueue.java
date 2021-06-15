@@ -22,9 +22,9 @@ public class ConcurrentQueue<T> {
     private final AtomicLong[] als = new AtomicLong[11];
 
     public ConcurrentQueue(int preferCapacity) {
-        double pow = log2((double) preferCapacity);
+        double pow = log2(preferCapacity);
         double intValuePow = (double) (long) pow;
-        this.capacity = intValuePow == pow ? preferCapacity : Double.valueOf(Math.pow(2.0d, intValuePow + 1)).intValue();
+        this.capacity = Double.compare(intValuePow, pow) == 0 ? preferCapacity : Double.valueOf(Math.pow(2.0d, intValuePow + 1)).intValue();
         array = new AtomicReferenceArray<>(this.capacity);
         falseOffer = new byte[this.capacity];
         falsePoll = new byte[this.capacity];
