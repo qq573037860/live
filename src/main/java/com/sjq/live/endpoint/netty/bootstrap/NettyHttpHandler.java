@@ -30,7 +30,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("=============================http-start=============================");
+        System.out.println("=============================http-start=============================" + Thread.currentThread().getName());
         System.out.println(msg);
         System.out.println("=============================http-end=============================");
         if (msg instanceof DefaultHttpRequest) {
@@ -163,9 +163,9 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
         final ByteBuf byteBuf = lastHttpContent.content();
 
-        if (Unpooled.EMPTY_BUFFER == byteBuf) {
+        /*if (0 == byteBuf.readableBytes() || Unpooled.EMPTY_BUFFER == byteBuf) {
             return;
-        }
+        }*/
 
         try {
             if (nettyHttpRequest.isChunkedReq()) {

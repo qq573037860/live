@@ -8,7 +8,9 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class NettyServer implements InitializingBean {
     private void openHttpServer() {
         ServerBootstrap bootstrap = new ServerBootstrap();
 
-        EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
+        EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(2, "NettyServerBoss");
         EventLoopGroup workerGroup = NettyEventLoopFactory.eventLoopGroup(
                 10,
                 "NettyServerWorker");
@@ -71,10 +73,12 @@ public class NettyServer implements InitializingBean {
                         sslEngine.setNeedClientAuth(false);
 
                         ch.pipeline()
+                            //.addLast(new LoggingHandler("DEBUG"))
                             .addLast(new SslHandler(sslEngine))
                             .addLast(new HttpServerCodec())
                             //.addLast("httpAggregator",new HttpObjectAggregator(1024*1024)) // http 消息聚合器(解析body中的数据)
-                            //.addLast()
+                            //.addLast(new HttpRequestHandler())
+                            //.addLast(new WebSocketServerHandler());
                             .addLast(new NettyHttpHandler())
                             .addLast(new NettyWebsocketHandler(liveConfiguration));
                     }

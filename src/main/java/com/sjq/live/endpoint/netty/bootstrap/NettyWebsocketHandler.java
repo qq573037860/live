@@ -36,7 +36,7 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("=============================netty-start=============================");
+        System.out.println("=============================netty-start=============================" + Thread.currentThread().getName());
         System.out.println(msg);
         System.out.println("=============================netty-end=============================");
         if (msg instanceof DefaultHttpRequest) {
@@ -96,7 +96,7 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
 
         //握手
         if (methodInvokerHandler.beforeHandshake(context)) {
-            String webSocketURL = String.format("%s://%s:%s%s", LiveConfiguration.WEBSOCKET_PROTOCOL, configuration.getServerIp(), configuration.getServerPort(), path);
+            String webSocketURL = String.format("%s://%s:%s%s", LiveConfiguration.WEBSOCKET_PROTOCOL, /*configuration.getServerIp()*/"192.168.1.6", /*configuration.getServerPort()*/9999, path);
             WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(webSocketURL, null, false);
             handshake = wsFactory.newHandshaker(request);
             if (Objects.isNull(handshake)) {
@@ -107,6 +107,7 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
                 future.addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                        System.out.println("methodInvokerHandler:" + Thread.currentThread().getName());
                         methodInvokerHandler.afterConnectionEstablished(context);
                         channelFuture.removeListener(this);
                     }
