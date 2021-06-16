@@ -7,6 +7,7 @@ import com.sjq.live.support.netty.NettyChannelAttribute;
 import com.sjq.live.support.netty.NettyInputStreamProcessor;
 import com.sjq.live.utils.NettyUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
@@ -29,6 +30,9 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println("=============================http-start=============================");
+        System.out.println(msg);
+        System.out.println("=============================http-end=============================");
         if (msg instanceof DefaultHttpRequest) {
             final DefaultHttpRequest request = (DefaultHttpRequest) msg;
             processHttpRequest(request, ctx);
@@ -156,7 +160,13 @@ public class NettyHttpHandler extends AbstractNettyHandler {
     private void processLastHttpContent(final LastHttpContent lastHttpContent,
                                         final ChannelHandlerContext ctx) {
         //final NettyHttpRequest nettyHttpRequest = NettyChannelAttribute.getNettyHttpRequest(ctx);
+
         final ByteBuf byteBuf = lastHttpContent.content();
+
+        if (Unpooled.EMPTY_BUFFER == byteBuf) {
+            return;
+        }
+
         try {
             if (nettyHttpRequest.isChunkedReq()) {
                 //处理最后一次chunked请求数据

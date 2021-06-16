@@ -39,7 +39,7 @@ public abstract class AbstractNettyHandler extends ChannelInboundHandlerAdapter 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         //触发异常信息
         final String hostAddress = NettyChannelAttribute.getHostAddress(ctx);
-        logger.info("客户端[{}]与服务器连接异常", hostAddress, cause);
+        logger.error("客户端[{}]与服务器连接异常", hostAddress, cause);
         try {
             doExceptionCaught(ctx, cause);
         } finally {

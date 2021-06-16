@@ -1,6 +1,7 @@
 (function(win, doc){
 
     function VideoDataRecorder (ops) {
+        //alert("VideoDataRecorder-init" + ops)
         let options = ops || {};
         this._init(options);
     }
@@ -62,22 +63,26 @@
         _start : function() {
             let _self = this;
             //视频数据录制
+            alert("_start")
             if (this._defaultParam.dataHandler) {
                 let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm',audioBitsPerSecond: 250,videoBitsPerSecond: 1000,});
                 this._defaultParam.recorder = recorder;
-                recorder.start(1);
+                recorder.start(10);
                 recorder.addEventListener('dataavailable', function (e) {
                     if (e.data.size > 0) {
                         let fr = new FileReader();
+                        //alert("dataSize:" + e.data.size)
                         fr.addEventListener("loadend", function (d) {
                             //reader.result是一个含有视频数据流的Blob对象
                             try {
                                 if (d.target.result.byteLength > 0) {//加这个判断，是因为有很多数据是空的，这个没有必要发到后台服务器，减轻网络开销，提升性能吧。
+                                    //alert("sendSize:" + d.target.result)
                                     _self._defaultParam.dataHandler(d.target.result);
                                 }
                             } catch (e) {
                                 for (var i in e) {
                                     console.error('异常,key:' + i + ",value:" + e[i]);
+                                    alert('异常,key:' + i + ",value:" + e[i]);
                                 }
                             }
                         });

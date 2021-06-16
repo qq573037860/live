@@ -1,11 +1,11 @@
 server:
-  port: 8888
+  port: 8889
   # 服务器外网ip
   extranet: 127.0.0.1
   ssl:
     key-password: 123456
-    key-store: classpath:spring.keystore
-    key-alias: spring
+    key-store: classpath:living.jks
+    key-alias: mykey
 
 spring:
   application:

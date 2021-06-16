@@ -15,7 +15,7 @@ public class LiveConfiguration {
     private static final String TRANSFORMED_STREAM_PROTOCOL = "https";
     public static final String ORIGIN_STREAM_PATH = "/originStream";
     public static final String TRANSFORMED_STREAM_PATH = "/transformedStream";
-    public static final String WEBSOCKET_PROTOCOL = "ws";
+    public static final String WEBSOCKET_PROTOCOL = "wss";
     public static final String PUBLISH_PATH = "/ws/publishVideoStream";
     public static final String SUBSCRIBE_PATH = "/ws/subscribeVideoStream";
 

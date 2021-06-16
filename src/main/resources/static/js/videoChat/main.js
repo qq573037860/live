@@ -1,8 +1,10 @@
 let publishJson = {};
 function publish(publishId) {
+    //alert("publish(publishId)")
     if (!publishJson[publishId]) {
         let streamHandler = new window.VideoStreamHandler();
         streamHandler._pushStream(publishId, function(){
+            //alert("new window.VideoDataRecorder")
             let recorder = new window.VideoDataRecorder({
                 "videoDom": document.getElementById("myVideo"),
                 "dataHandler": function (data) {
@@ -27,8 +29,9 @@ function subscribe(subscribeId) {
 }
 
 function bindEvent() {
-
+    //alert("bindEvent")
     document.getElementById("publish_id_confirm").addEventListener('click', function(){
+        //alert("publish_id_confirm")
         let publishId = document.getElementById("publish_id").value;
         if (publishId) {
             document.getElementById("identifyWindow").style.display = "none";
