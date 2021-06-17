@@ -54,7 +54,7 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
         public byte[] poll() throws IOException {
             byte[] data;
             for (;;) {
-                data = chunkQueue.poll(100L);
+                data = chunkQueue.poll();
                 if (Objects.nonNull(data) || isProduceEnd) {
                     break;
                 }

@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 public abstract class AbstractStreamDistributeHandler {
     private String id;
-    private volatile boolean isFirst = true;
+    private volatile int status = 0;
 
     private Consumer<String> destroyCallBack;
 
@@ -19,8 +19,8 @@ public abstract class AbstractStreamDistributeHandler {
      * @param bytes
      */
     public void send(final byte[] bytes) {
-        if (isFirst) {
-            isFirst = false;
+        if (status == 0) {
+            status = 1;
             onData(bytes);
         }
     }
@@ -28,20 +28,27 @@ public abstract class AbstractStreamDistributeHandler {
     public void send(final byte[] bytes,
                      final byte[] headerData,
                      final boolean isTagHeaderStart) {
+
+        if (status == 2) {
+            onData(bytes);
+            return;
+        }
+
         //第一次发送的起始数据(包含flvHeader 和 keyFrames)
-        if (isFirst) {
+        if (status == 0) {
             synchronized (this) {
-                if (isFirst) {
-                    isFirst = false;
-                    onData(headerData);
-                    //要从一个tagHeader开始读数据
-                    if (!isTagHeaderStart) {
-                        return;
-                    }
-                }
+                send(headerData);
             }
         }
-        onData(bytes);
+        if (status == 1) {
+            //要从一个tagHeader开始读数据
+            if (!isTagHeaderStart) {
+                return;
+            }
+
+            onData(bytes);
+            status = 2;
+        }
     }
 
     public void destroy() {

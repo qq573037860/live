@@ -40,7 +40,7 @@ public class NettyServer implements InitializingBean {
     private void openHttpServer() {
         ServerBootstrap bootstrap = new ServerBootstrap();
 
-        EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(2, "NettyServerBoss");
+        EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
         EventLoopGroup workerGroup = NettyEventLoopFactory.eventLoopGroup(
                 10,
                 "NettyServerWorker");

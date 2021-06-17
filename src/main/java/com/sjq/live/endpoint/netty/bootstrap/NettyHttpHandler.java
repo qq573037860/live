@@ -30,9 +30,9 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("=============================http-start=============================" + Thread.currentThread().getName());
-        System.out.println(msg);
-        System.out.println("=============================http-end=============================");
+        //System.out.println("=============================http-start=============================" + Thread.currentThread().getName());
+        //System.out.println(msg);
+        //System.out.println("=============================http-end=============================");
         if (msg instanceof DefaultHttpRequest) {
             final DefaultHttpRequest request = (DefaultHttpRequest) msg;
             processHttpRequest(request, ctx);

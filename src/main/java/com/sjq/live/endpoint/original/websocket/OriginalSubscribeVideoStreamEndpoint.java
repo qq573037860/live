@@ -60,6 +60,11 @@ public class OriginalSubscribeVideoStreamEndpoint extends AbstractBinaryWebSocke
         public void onData(final byte[] bytes) {
             if (!session.isOpen()) {
                 logger.error("session:{}, 连接为关闭状态", session.toString());
+                try {
+                    session.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return;
             }
             try {

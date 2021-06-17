@@ -36,9 +36,9 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("=============================netty-start=============================" + Thread.currentThread().getName());
-        System.out.println(msg);
-        System.out.println("=============================netty-end=============================");
+        //System.out.println("=============================netty-start=============================" + Thread.currentThread().getName());
+        //System.out.println(msg);
+        //System.out.println("=============================netty-end=============================");
         if (msg instanceof DefaultHttpRequest) {
             DefaultHttpRequest request = (DefaultHttpRequest) msg;
             processHttpRequest(request, ctx);
@@ -107,7 +107,6 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
                 future.addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                        System.out.println("methodInvokerHandler:" + Thread.currentThread().getName());
                         methodInvokerHandler.afterConnectionEstablished(context);
                         channelFuture.removeListener(this);
                     }

@@ -3,6 +3,7 @@ package com.sjq.live.utils;
 //import io.netty.util.internal.shaded.org.jctools.queues.ConcurrentCircularArrayQueue;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * 适用1p-1c场景 非线程安全
@@ -76,7 +77,7 @@ public class Queue<T> {
     volatile Boolean lock = false;*/
 
     private static final int MIN_PARK_TIME_NS = 10;
-    private static final int MAX_PACK_TIME_NS = 160;
+    private static final int MAX_PACK_TIME_NS = 100;
 
 
     public Queue(int preferCapacity) {
@@ -119,10 +120,10 @@ public class Queue<T> {
     public T poll() {
         int p = (int) (tail++ & this.m);
         Object r;
-        //int parkTime = MIN_PARK_TIME_NS;
+        int parkTime = MIN_PARK_TIME_NS;
         while((r = array[p]) == null) {
-            //LockSupport.parkNanos(parkTime);
-            //if(parkTime < MAX_PACK_TIME_NS) parkTime <<= 1;
+            LockSupport.parkNanos(parkTime);
+            if(parkTime < MAX_PACK_TIME_NS) parkTime <<= 1;
         }
         array[p] = null;
         return (T) r;

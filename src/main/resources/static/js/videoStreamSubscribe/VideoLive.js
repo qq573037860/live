@@ -18,20 +18,21 @@
                 duration: 0
             },
             optionalConfig : {
-                /*enableWorker: true,*/
+                //enableWorker: true,
                 /*seekType: 'range',*/
                 enableStashBuffer: false,
+                stashInitialSize: undefined,
                 isLive: true,
                 lazyLoad: false,
                 lazyLoadMaxDuration: 0,
                 lazyLoadRecoverDuration: 0,
                 deferLoadAfterSourceOpen: false,
-                fixAudioTimestampGap: false
+                fixAudioTimestampGap: false,
             },
             recordJson : {}
         },
         _init : function(options) {
-            this._defaultParam.pushUrl = "wss://" + win.location.host + "/ws/subscribeVideoStream?"
+            this._defaultParam.pushUrl = "wss://" + win.location.host.replace("8889","9999") + "/ws/subscribeVideoStream?"
         },
         _live : function(subscribeId, videoDom) {
 
@@ -52,15 +53,25 @@
 
             //避免时间长时间积累缓冲导致延迟越来越高
             setInterval(() => {
-                if (!player.buffered.length) {
+                /*let end = videoDom.endTime;
+                if (!end) {
                     return;
                 }
-                let end = player.buffered.end(0);
-                let diff = end - player.currentTime;
-                if (diff >= 1.5) {
-                    player.currentTime = end - 0.1;
+                let diff = end - videoDom.currentTime;
+                if (diff >= 0.5) {
+                    videoDom.currentTime = end;
+                }*/
+
+                if (player.buffered.length) {
+                    let end = player.buffered.end(0);//获取当前buffered值
+                    let diff = end - player.currentTime;//获取buffered与currentTime的差值
+                    if (diff >= 0.5) {//如果差值大于等于0.5 手动跳帧 这里可根据自身需求来定
+                        player.currentTime = end - 0.01;//手动跳帧
+                        console.info("change time")
+                    }
                 }
-            }, 3 * 10 * 1000);
+                console.info((player.buffered.end(0) - player.currentTime) + "-" + player.buffered.end(0) + "-" + player.currentTime)
+            }, 2000);
         },
         _destoryPlayer : function(player) {
             player.pause();

@@ -8,7 +8,11 @@ import com.sjq.live.model.NettyWebsocketContext;
 import com.sjq.live.model.RequestParam;
 import com.sjq.live.service.VideoStreamHandler;
 import com.sjq.live.support.AbstractStreamDistributeHandler;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,12 +75,13 @@ public class SubscribeVideoStreamEndpointEndPointNetty implements NettyWebsocket
 
         @Override
         public void onData(final byte[] bytes) {
-            if (!channelHandler.channel().isOpen()) {
+            /*if (!channelHandler.channel().isOpen()) {
                 logger.error("session:{}, 连接为关闭状态", channelHandler.toString());
+                channelHandler.close();
                 return;
-            }
+            }*/
             try {
-                channelHandler.writeAndFlush(bytes);
+                channelHandler.writeAndFlush(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)));
             } catch (Exception e) {
                 logger.error("session:{}，数据发送失败！", channelHandler.toString(), e);
                 channelHandler.close();

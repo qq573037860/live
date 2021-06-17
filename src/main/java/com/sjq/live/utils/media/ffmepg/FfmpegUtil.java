@@ -53,6 +53,14 @@ public class FfmpegUtil {
         List<String> command = Lists.newArrayList();
         command.add(ffmpegPath + "\\ffmpeg");
 
+        //command.add("-hwaccel");
+        //command.add("qsv");
+
+        //command.add("-c:v");
+        //command.add("h264");
+
+        //command.add("-noautorotate");
+
         command.add("-i");
         command.add(srcUrl);
 
@@ -60,19 +68,23 @@ public class FfmpegUtil {
         command.add("zerolatency");
 
         command.add("-threads");
-        command.add("4");
+        command.add("8");
+
+        command.add("-preset");
+        command.add("ultrafast");
 
         command.add("-c:v");
         command.add("libx264");
+        //command.add("h264_qsv");
 
         command.add("-acodec");
         command.add("aac");
 
+        //command.add("-vcodec");
+        //command.add("h264_qsv");
+
         command.add("-crf");
         command.add("28");
-
-        command.add("-preset");
-        command.add("ultrafast");
 
         command.add("-f");
         command.add("flv");

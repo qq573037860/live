@@ -2579,6 +2579,7 @@ var MSEController = function () {
     }, {
         key: 'appendMediaSegment',
         value: function appendMediaSegment(mediaSegment) {
+
             var ms = mediaSegment;
             this._pendingSegments[ms.type].push(ms);
 
