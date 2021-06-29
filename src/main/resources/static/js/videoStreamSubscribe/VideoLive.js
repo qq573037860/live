@@ -18,7 +18,7 @@
                 duration: 0
             },
             optionalConfig : {
-                //enableWorker: true,
+                enableWorker: true,
                 /*seekType: 'range',*/
                 enableStashBuffer: false,
                 stashInitialSize: undefined,
@@ -32,7 +32,7 @@
             recordJson : {}
         },
         _init : function(options) {
-            this._defaultParam.pushUrl = "wss://" + win.location.host.replace("8889","9999") + "/ws/subscribeVideoStream?"
+            this._defaultParam.pushUrl = "wss://" + win.location.host + "/ws/subscribeVideoStream?"
         },
         _live : function(subscribeId, videoDom) {
 

@@ -1,38 +1,30 @@
 package com.sjq.live.support.netty;
 
-import com.sjq.live.model.NettyHttpContext;
 import com.sjq.live.support.OutputStreamProcessor;
-import com.sjq.live.utils.NettyUtils;
-import io.netty.channel.ChannelHandlerContext;
 import org.springframework.util.Assert;
 
 public class NettyOutputStreamProcessor extends OutputStreamProcessor {
 
-    private final ChannelHandlerContext ctx;
+    private final NettyOutputStream outputStream;
 
-    public NettyOutputStreamProcessor(final NettyHttpContext request) {
-        Assert.notNull(request, "NettyRequest不能为空");
+    public NettyOutputStreamProcessor(final NettyOutputStream outputStream) {
+        Assert.notNull(outputStream, "NettyOutputStream不能为空");
 
-        this.ctx = request.getCtx();
-        //返回一个HttpChunk的开头
-        NettyUtils.writeHttpChunkResponse(ctx);
+        this.outputStream = outputStream;
     }
 
     @Override
     public void writeToStream(final byte[] bytes) {
-        //返回HttpChunkContent
-        NettyUtils.writeChunkContentResponse(ctx, bytes);
+        outputStream.write(bytes);
     }
 
     @Override
     public void flushStream() {
-        ctx.flush();
+        outputStream.flush();
     }
 
     @Override
     protected void closeStream() {
-        NettyUtils.writeLastEmptyContentResponse(ctx);
-        ctx.flush();
-        ctx.close();
+        outputStream.close();
     }
 }

@@ -1,14 +1,14 @@
 package com.sjq.live.model;
 
-import io.netty.channel.ChannelHandlerContext;
+import com.sjq.live.support.netty.NettyOutputStream;
 
 public class NettyHttpContext {
 
-    private ChannelHandlerContext ctx;
+    private NettyOutputStream outputStream;
     private NettyHttpRequest nettyHttpRequest;
 
-    public NettyHttpContext(ChannelHandlerContext ctx, NettyHttpRequest nettyHttpRequest) {
-        this.ctx = ctx;
+    public NettyHttpContext(NettyOutputStream outputStream, NettyHttpRequest nettyHttpRequest) {
+        this.outputStream = outputStream;
         this.nettyHttpRequest = nettyHttpRequest;
     }
 
@@ -16,13 +16,7 @@ public class NettyHttpContext {
         return nettyHttpRequest;
     }
 
-    public ChannelHandlerContext getCtx() {
-        return ctx;
+    public NettyOutputStream getOutputStream() {
+        return outputStream;
     }
-
-    public void setCtx(ChannelHandlerContext ctx) {
-        this.ctx = ctx;
-    }
-
-
 }

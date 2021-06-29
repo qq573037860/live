@@ -5,6 +5,7 @@ import com.sjq.live.model.NettyHttpContext;
 import com.sjq.live.model.NettyHttpRequest;
 import com.sjq.live.support.netty.NettyChannelAttribute;
 import com.sjq.live.support.netty.NettyInputStreamProcessor;
+import com.sjq.live.support.netty.NettyOutputStream;
 import com.sjq.live.utils.NettyUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -27,6 +28,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
     private NettyHttpEndPointHandlerProxy nettyHttpEndPointHandlerProxy;
     private NettyHttpRequest nettyHttpRequest;
+    private boolean isNotFounded = false;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -81,7 +83,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
         final ByteBuf content = isFullHttpRequest ? ((DefaultFullHttpRequest)request).content() : null;
 
         try {
-            processNormalHttpRequest(ctx, path, request.method().name(), params, headers, isFullHttpRequest);
+            processNormalHttpRequest(ctx, path, request.protocolVersion(), request.method().name(), params, headers, isFullHttpRequest);
         } finally {
             ReferenceCountUtil.release(content);
         }
@@ -89,6 +91,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
     private void processNormalHttpRequest(final ChannelHandlerContext ctx,
                                           final String path,
+                                          final HttpVersion httpVersion,
                                           final String httpMethod,
                                           final Map<String, Object> params,
                                           final HttpHeaders headers,
@@ -98,7 +101,9 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
         //返回404
         if (Objects.isNull(nettyHttpEndPointHandlerProxy)) {
+            isNotFounded = true;
             NettyUtils.writeHttpNotFoundResponse(ctx);
+            ctx.flush();
             return;
         }
 
@@ -106,6 +111,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
         nettyHttpRequest = new NettyHttpRequest();
         nettyHttpRequest.setParams(params);
         nettyHttpRequest.setPath(path);
+        nettyHttpRequest.setHttpVersion(httpVersion);
         nettyHttpRequest.setChunkedReq(StringUtils.equals(headers.get(HttpHeaderNames.TRANSFER_ENCODING), HttpHeaderValues.CHUNKED));
         //NettyChannelAttribute.setMethodInvokerHandler(ctx, methodInvokerHandler);
         //NettyChannelAttribute.setNettyHttpRequest(ctx, nettyHttpRequest);
@@ -121,7 +127,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
     private void processFullHttpRequest(final ChannelHandlerContext ctx) {
         //final MethodInvokerHandler methodInvokerHandler = NettyChannelAttribute.getMethodInvokerHandler(ctx);
-        nettyHttpEndPointHandlerProxy.invoke(new Object[]{new NettyHttpContext(ctx, nettyHttpRequest)});
+        nettyHttpEndPointHandlerProxy.invoke(nettyHttpRequest, ctx);
     }
 
     private void processChunkedRequest(final ChannelHandlerContext ctx) {
@@ -130,7 +136,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
         nettyHttpRequest.setChunkDataHandler(new NettyInputStreamProcessor.ChunkDataHandler());
         //调用
         //final MethodInvokerHandler methodInvokerHandler = NettyChannelAttribute.getMethodInvokerHandler(ctx);
-        nettyHttpEndPointHandlerProxy.invokeAsync(new Object[]{new NettyHttpContext(ctx, nettyHttpRequest)});
+        nettyHttpEndPointHandlerProxy.invokeAsync(nettyHttpRequest, ctx);
     }
 
     private void processLastChunkedRequest(final ByteBuf byteBuf) {
@@ -160,6 +166,10 @@ public class NettyHttpHandler extends AbstractNettyHandler {
     private void processLastHttpContent(final LastHttpContent lastHttpContent,
                                         final ChannelHandlerContext ctx) {
         //final NettyHttpRequest nettyHttpRequest = NettyChannelAttribute.getNettyHttpRequest(ctx);
+
+        if (isNotFounded) {
+            return;
+        }
 
         final ByteBuf byteBuf = lastHttpContent.content();
 

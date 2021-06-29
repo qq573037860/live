@@ -73,6 +73,12 @@
             <version>4.1.65.Final</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.70</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

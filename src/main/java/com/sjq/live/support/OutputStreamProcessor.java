@@ -67,28 +67,15 @@ public abstract class OutputStreamProcessor {
     }
 
     public void processData() {
-        //boolean flush = false;
-        //int count = 0;
         for (;;) {
-            byte[] bytes = queue.poll(1L);
+            byte[] bytes = queue.poll(10L);
             if (Objects.isNull(bytes)) {
-                /*if (!flush) {
-                    flushStream();
-                    flush = true;
-                }*/
                 continue;
             } else if (bytes.length == 0) {
                 break;
             }
             writeToStream(bytes);
-            //if (++count > 4 && !flush) {
-                flushStream();
-            /*    flush = true;
-                count = 0;
-            } else {
-                flush = false;
-            }*/
-            //flushStream();
+            flushStream();
         }
         closeStream();
     }

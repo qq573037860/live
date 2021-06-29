@@ -14,11 +14,11 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
 
     private final ChunkDataHandler chunkDataHandler;
 
-    private final ChannelHandlerContext ctx;
+    private final NettyOutputStream outputStream;
 
     public NettyInputStreamProcessor(final NettyHttpContext request) {
         this.chunkDataHandler = request.getHttpRequest().getChunkDataHandler();
-        this.ctx = request.getCtx();
+        this.outputStream = request.getOutputStream();
     }
 
     @Override
@@ -28,7 +28,7 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
 
     @Override
     public void close() throws IOException {
-        NettyUtils.writeHttpOkResponse(ctx);
+        outputStream.close();
     }
 
     public static class ChunkDataHandler {

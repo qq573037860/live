@@ -7,6 +7,7 @@ import com.sjq.live.model.LiveException;
 import com.sjq.live.support.spring.SpringBeanUtil;
 import com.sjq.live.utils.PackageScanner;
 import com.sjq.live.utils.proxy.Wrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.asm.Type;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
@@ -31,6 +32,8 @@ public class NettyEndPointRegister {
     private static final Set<String> WS_HANDLER_METHOD_DESCRIPTION_SET = Sets.newHashSet();
     private static final String METHOD_DESCRIPTION_FORMAT = "%s#%s";
 
+    private static final NettyHttpEndPointHandlerProxy STATIC_RESOURCE_HANDLER = new NettyHttpEndPointHandlerProxy(true);
+
     static {
         for (Method method : WEBSOCKET_END_POINT_HANDLER_CLASS.getMethods()) {
             WS_HANDLER_METHOD_DESCRIPTION_SET.add(getMethodDescription(method));
@@ -46,7 +49,14 @@ public class NettyEndPointRegister {
     }
 
     public static <T> T match(String path, HttpMethod method) {
-        return (T) METHOD_INVOKER_HOLDER_MAP.get(buildKey(path, method));
+        T handler = (T) METHOD_INVOKER_HOLDER_MAP.get(buildKey(path, method));
+
+        //如果去静态资源请求则返回对应处理类
+        if (Objects.isNull(handler) && StringUtils.startsWithAny(path, "/js", "/css")) {
+            handler = (T) STATIC_RESOURCE_HANDLER;
+        }
+
+        return handler;
     }
 
     public static <T> T match(String path) {
@@ -98,7 +108,7 @@ public class NettyEndPointRegister {
                 if (Objects.nonNull(methodAnnotation)) {
                     String key = buildKey(prefixPath + methodAnnotation.path(), methodAnnotation.method());
                     METHOD_INVOKER_HOLDER_MAP.put(key, new NettyHttpEndPointHandlerProxy(Wrapper.makeWrapper(cls, methods.toArray(new Method[0])),
-                            SpringBeanUtil.getBean(cls), method.getName(), method.getParameterTypes()));
+                            SpringBeanUtil.getBean(cls), method));
                 }
             }
             if (isImplementNettyWebsocketInterface) {

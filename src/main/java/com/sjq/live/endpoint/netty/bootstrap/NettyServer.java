@@ -84,7 +84,7 @@ public class NettyServer implements InitializingBean {
                     }
                 });
         // bind
-        ChannelFuture channelFuture = bootstrap.bind(/*liveConfiguration.getServerPort()*/9999);
+        ChannelFuture channelFuture = bootstrap.bind(liveConfiguration.getServerPort());
         channelFuture.syncUninterruptibly();
         Channel channel = channelFuture.channel();
         channel.closeFuture().addListener(future -> logger.info("服务器端关闭"));

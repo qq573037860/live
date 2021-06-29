@@ -30,7 +30,7 @@ public class NettyTransformStreamEndpoint {
     @NettyEndPoint(path = LiveConfiguration.ORIGIN_STREAM_PATH, method = HttpMethod.GET)
     public void originStream(final NettyHttpContext context) throws Exception {
         final Map<String, Object> params = context.getHttpRequest().getParams();
-        transformStreamHandler.processOriginalStream((String) params.get("publishId"), new NettyOutputStreamProcessor(context));
+        transformStreamHandler.processOriginalStream((String) params.get("publishId"), new NettyOutputStreamProcessor(context.getOutputStream()));
     }
 
     /**

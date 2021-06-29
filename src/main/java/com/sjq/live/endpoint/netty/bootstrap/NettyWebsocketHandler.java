@@ -96,7 +96,7 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
 
         //握手
         if (methodInvokerHandler.beforeHandshake(context)) {
-            String webSocketURL = String.format("%s://%s:%s%s", LiveConfiguration.WEBSOCKET_PROTOCOL, /*configuration.getServerIp()*/"192.168.1.6", /*configuration.getServerPort()*/9999, path);
+            String webSocketURL = String.format("%s://%s:%s%s", LiveConfiguration.WEBSOCKET_PROTOCOL, configuration.getServerIp(), configuration.getServerPort(), path);
             WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(webSocketURL, null, false);
             handshake = wsFactory.newHandshaker(request);
             if (Objects.isNull(handshake)) {

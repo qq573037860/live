@@ -72,7 +72,6 @@
                     //reader.result是一个含有视频数据流的Blob对象
                     try {
                         if (d.target.result.byteLength > 0) {//加这个判断，是因为有很多数据是空的，这个没有必要发到后台服务器，减轻网络开销，提升性能吧。
-                            //alert("sendSize:" + d.target.result)
                             _self._defaultParam.dataHandler(d.target.result);
                         }
                     } catch (e) {
@@ -84,7 +83,6 @@
                 });
                 recorder.addEventListener('dataavailable', function (e) {
                     if (e.data.size > 0) {
-                        //alert("dataSize:" + e.data.size)
                         fr.readAsArrayBuffer(e.data);
                     }
                 });

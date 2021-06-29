@@ -11,6 +11,9 @@ public class LiveConfiguration {
     @Value("${server.extranet}")
     private String serverIp;
 
+    @Value("${server.ssl.key-password}")
+    private String sslKeyPassword;
+
     private static final String ORIGIN_STREAM_PROTOCOL = "https";
     private static final String TRANSFORMED_STREAM_PROTOCOL = "https";
     public static final String ORIGIN_STREAM_PATH = "/originStream";
@@ -20,11 +23,11 @@ public class LiveConfiguration {
     public static final String SUBSCRIBE_PATH = "/ws/subscribeVideoStream";
 
     public String buildOriginStreamUrl(final String publishId) {
-        return String.format("%s://%s:%s%s?publishId=%s", ORIGIN_STREAM_PROTOCOL, serverIp, /*serverPort*/9999, ORIGIN_STREAM_PATH, publishId);
+        return String.format("%s://%s:%s%s?publishId=%s", ORIGIN_STREAM_PROTOCOL, serverIp, serverPort, ORIGIN_STREAM_PATH, publishId);
     }
 
     public String buildTransformedStreamUrl(final String publishId) {
-        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, /*serverPort*/9999, TRANSFORMED_STREAM_PATH, publishId);
+        return String.format("%s://%s:%s%s?publishId=%s", TRANSFORMED_STREAM_PROTOCOL, serverIp, serverPort, TRANSFORMED_STREAM_PATH, publishId);
     }
 
     public String buildWebsocketPublishUrl() {
@@ -51,4 +54,7 @@ public class LiveConfiguration {
         return TRANSFORMED_STREAM_PROTOCOL;
     }
 
+    public String getSslKeyPassword() {
+        return sslKeyPassword;
+    }
 }

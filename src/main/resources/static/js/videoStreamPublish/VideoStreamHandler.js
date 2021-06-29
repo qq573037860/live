@@ -24,7 +24,7 @@
             return ws;
         },
         _init : function () {
-            this.pushUrl = "wss://" + win.location.host.replace("8889", "9999") + "/ws/publishVideoStream?"
+            this.pushUrl = "wss://" + win.location.host + "/ws/publishVideoStream?"
         },
         _pushStream : function (publishId, onOpenCallBack) {
             const url = this.pushUrl + "publishId=" + publishId + "&userId=" + new Date().getTime();
