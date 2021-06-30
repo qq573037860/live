@@ -4,13 +4,12 @@ import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.netty.NettyEndPointSwitch;
 import com.sjq.live.endpoint.netty.bootstrap.NettyEndPoint;
 import com.sjq.live.endpoint.netty.bootstrap.NettyWebsocketEndPointHandler;
+import com.sjq.live.model.LiveException;
 import com.sjq.live.model.NettyWebsocketContext;
 import com.sjq.live.model.RequestParam;
-import com.sjq.live.service.VideoStreamHandler;
+import com.sjq.live.handler.VideoStreamHandler;
 import com.sjq.live.support.AbstractStreamDistributeHandler;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import org.apache.commons.lang3.StringUtils;
@@ -20,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 @NettyEndPoint(path = LiveConfiguration.SUBSCRIBE_PATH)
 @Component
@@ -75,16 +72,12 @@ public class SubscribeVideoStreamEndpointEndPointNetty implements NettyWebsocket
 
         @Override
         public void onData(final byte[] bytes) {
-            /*if (!channelHandler.channel().isOpen()) {
-                logger.error("session:{}, 连接为关闭状态", channelHandler.toString());
-                channelHandler.close();
-                return;
-            }*/
             try {
                 channelHandler.writeAndFlush(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)));
             } catch (Exception e) {
                 logger.error("session:{}，数据发送失败！", channelHandler.toString(), e);
                 channelHandler.close();
+                throw new LiveException(e);
             }
         }
     }

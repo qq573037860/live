@@ -2,7 +2,7 @@ package com.sjq.live.endpoint.original.websocket;
 
 import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
-import com.sjq.live.service.VideoStreamHandler;
+import com.sjq.live.handler.VideoStreamHandler;
 import com.sjq.live.model.RequestParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

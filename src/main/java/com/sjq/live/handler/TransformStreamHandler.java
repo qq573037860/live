@@ -1,4 +1,4 @@
-package com.sjq.live.service;
+package com.sjq.live.handler;
 
 import com.sjq.live.model.LiveException;
 import com.sjq.live.model.OperateResponse;

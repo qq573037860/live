@@ -1,5 +1,6 @@
 package com.sjq.live.support.original;
 
+import com.sjq.live.model.LiveException;
 import com.sjq.live.support.OutputStreamProcessor;
 import org.springframework.util.Assert;
 
@@ -21,6 +22,7 @@ public class ServletOutputStreamProcessor extends OutputStreamProcessor {
         try {
             outputStream.write(bytes);
         } catch (IOException e){
+            throw new LiveException(e);
         }
     }
 
@@ -29,6 +31,7 @@ public class ServletOutputStreamProcessor extends OutputStreamProcessor {
         try {
             outputStream.flush();
         } catch (IOException e){
+            throw new LiveException(e);
         }
     }
 

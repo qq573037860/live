@@ -2,7 +2,8 @@ package com.sjq.live.endpoint.original.websocket;
 
 import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
-import com.sjq.live.service.VideoStreamHandler;
+import com.sjq.live.handler.VideoStreamHandler;
+import com.sjq.live.model.LiveException;
 import com.sjq.live.support.AbstractStreamDistributeHandler;
 import com.sjq.live.model.RequestParam;
 import org.slf4j.Logger;
@@ -76,6 +77,7 @@ public class OriginalSubscribeVideoStreamEndpoint extends AbstractBinaryWebSocke
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+                throw new LiveException(e);
             }
         }
     }

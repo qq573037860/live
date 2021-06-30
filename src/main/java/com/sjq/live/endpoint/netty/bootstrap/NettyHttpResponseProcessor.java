@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 /**
  * HTTP 返回处理器
  */
-public class DefaultNettyHttpResponseProcessor {
+public class NettyHttpResponseProcessor {
 
     /**
      * 处理http接口方法返回值
@@ -48,15 +48,27 @@ public class DefaultNettyHttpResponseProcessor {
 
     }
 
+    /**
+     * 返回字符类型结果
+     * @param context
+     * @param result
+     */
     private static void response(ChannelHandlerContext context, String result) {
         NettyUtils.writeHttpOkResponse(context, result.getBytes());
         context.flush();
     }
 
-    public static void processStaticResourceResponse(ChannelHandlerContext context, NettyHttpRequest nettyHttpRequest, String path) {
+    /**
+     * 处理静态资源请求返回值
+     * @param context
+     * @param nettyHttpRequest
+     * @param path
+     */
+    private static void processStaticResourceResponse(ChannelHandlerContext context, NettyHttpRequest nettyHttpRequest, String path) {
         NettyUtils.writeHttpOkResponse(context, nettyHttpRequest.getHttpVersion(), nettyHttpRequest.isKeepAlive(), path);
         context.flush();
     }
+
 
     private static boolean isStaticResource(String result) {
         return StringUtils.startsWithAny(result, "static", "templates");

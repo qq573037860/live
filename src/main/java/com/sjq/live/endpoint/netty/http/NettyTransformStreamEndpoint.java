@@ -4,7 +4,7 @@ import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.netty.NettyEndPointSwitch;
 import com.sjq.live.endpoint.netty.bootstrap.NettyEndPoint;
 import com.sjq.live.model.NettyHttpContext;
-import com.sjq.live.service.TransformStreamHandler;
+import com.sjq.live.handler.TransformStreamHandler;
 import com.sjq.live.support.netty.NettyInputStreamProcessor;
 import com.sjq.live.support.netty.NettyOutputStreamProcessor;
 import org.springframework.beans.factory.annotation.Autowired;

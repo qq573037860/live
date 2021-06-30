@@ -53,23 +53,16 @@ public class NettyServer implements InitializingBean {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
-
-                        /*ChannelPipeline p = ch.pipeline();
-                        EventExecutor e1 = new DefaultEventExecutor(16);
-                        EventExecutor e2 = new DefaultEventExecutor(8);
-
-                        p.addLast(new MyProtocolCodec());
-                        p.addLast(e1, new MyDatabaseAccessingHandler());
-                        p.addLast(e2, new MyHardDiskAccessingHandler());*/
-
-                        SSLContext sslContext = null; ///SslUtil自定义类
+                        //SslUtil自定义类
+                        SSLContext sslContext = null;
                         try {
                             sslContext = SslUtil.createSSLContext("123456");
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         SSLEngine sslEngine = sslContext.createSSLEngine();
-                        sslEngine.setUseClientMode(false); /// 是否使用客户端模式 sslEngine.setNeedClientAuth(false); ////是否需要验证客户端
+                        // 是否使用客户端模式 sslEngine.setNeedClientAuth(false); ////是否需要验证客户端
+                        sslEngine.setUseClientMode(false);
                         sslEngine.setNeedClientAuth(false);
 
                         ch.pipeline()
@@ -77,8 +70,6 @@ public class NettyServer implements InitializingBean {
                             .addLast(new SslHandler(sslEngine))
                             .addLast(new HttpServerCodec())
                             //.addLast("httpAggregator",new HttpObjectAggregator(1024*1024)) // http 消息聚合器(解析body中的数据)
-                            //.addLast(new HttpRequestHandler())
-                            //.addLast(new WebSocketServerHandler());
                             .addLast(new NettyHttpHandler())
                             .addLast(new NettyWebsocketHandler(liveConfiguration));
                     }

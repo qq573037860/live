@@ -9,6 +9,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 
+/**
+ *
+ */
 public class SslUtil {
 
     public static SSLContext createSSLContext(String password) throws Exception {

@@ -36,9 +36,6 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        //System.out.println("=============================netty-start=============================" + Thread.currentThread().getName());
-        //System.out.println(msg);
-        //System.out.println("=============================netty-end=============================");
         if (msg instanceof DefaultHttpRequest) {
             DefaultHttpRequest request = (DefaultHttpRequest) msg;
             processHttpRequest(request, ctx);
@@ -59,25 +56,22 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
     }
 
     private void processHttpRequest(DefaultHttpRequest request, ChannelHandlerContext ctx) throws URISyntaxException {
-        // 获取请求参数
-        final String path = new URI(request.uri()).getPath();
-        final ByteBuf content = request instanceof DefaultFullHttpRequest ? ((DefaultFullHttpRequest)request).content() : null;
+        if (!NettyUtils.isWebsocketRequest(request.headers())) {
+            ctx.fireChannelRead(request);
+            return;
+        }
 
-        //构造请求
+        // 构造请求
         final NettyWebsocketRequest websocketRequest = new NettyWebsocketRequest();
         websocketRequest.setAttribute(NettyUtils.convertParams(new QueryStringDecoder(request.uri()).parameters()));
         websocketRequest.setPath(request.uri());
         context = new NettyWebsocketContext(ctx, websocketRequest);
 
-        //websocket 请求
-        if (NettyUtils.isWebsocketRequest(request.headers())) {
-            try {
-                processWebsocketRequest(path, request, ctx);
-            } finally {
-                ReferenceCountUtil.release(content);
-            }
-        } else {
-            ctx.fireChannelRead(request);
+        // 处理请求
+        try {
+            processWebsocketRequest(new URI(request.uri()).getPath(), request, ctx);
+        } finally {
+            ReferenceCountUtil.release(request);
         }
     }
 
@@ -90,32 +84,34 @@ public class NettyWebsocketHandler extends AbstractNettyHandler {
         //返回404
         if (Objects.isNull(methodInvokerHandler)) {
             NettyUtils.writeHttpNotFoundResponse(ctx);
+            ctx.flush();
             return;
         }
-        //NettyChannelAttribute.setMethodInvokerHandler(ctx, methodInvokerHandler);
 
         //握手
-        if (methodInvokerHandler.beforeHandshake(context)) {
-            String webSocketURL = String.format("%s://%s:%s%s", LiveConfiguration.WEBSOCKET_PROTOCOL, configuration.getServerIp(), configuration.getServerPort(), path);
-            WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(webSocketURL, null, false);
-            handshake = wsFactory.newHandshaker(request);
-            if (Objects.isNull(handshake)) {
-                WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
-            } else {
-                ChannelFuture future = handshake.handshake(ctx.channel(), request);
-                //链接成功回调
-                future.addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                        methodInvokerHandler.afterConnectionEstablished(context);
-                        channelFuture.removeListener(this);
-                    }
-                });
-                //NettyChannelAttribute.setWebSocketServerHandShaker(ctx, handshake);
-            }
-        } else {
+        if (!methodInvokerHandler.beforeHandshake(context)) {
             NettyUtils.writeHttpBadRequestResponse(ctx);
+            ctx.flush();
+            return;
         }
+
+        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(buildUrl(path), null, false);
+        handshake = wsFactory.newHandshaker(request);
+
+        if (Objects.isNull(handshake)) {
+            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
+            return;
+        }
+
+        ChannelFuture future = handshake.handshake(ctx.channel(), request);
+        //链接成功回调
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture channelFuture) {
+                methodInvokerHandler.afterConnectionEstablished(context);
+                channelFuture.removeListener(this);
+            }
+        });
     }
 
     private String buildUrl(final String path) {

@@ -6,7 +6,7 @@ import com.sjq.live.endpoint.netty.bootstrap.NettyEndPoint;
 import com.sjq.live.endpoint.netty.bootstrap.NettyWebsocketEndPointHandler;
 import com.sjq.live.model.NettyWebsocketContext;
 import com.sjq.live.model.RequestParam;
-import com.sjq.live.service.VideoStreamHandler;
+import com.sjq.live.handler.VideoStreamHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 @NettyEndPoint(path = LiveConfiguration.PUBLISH_PATH)
 @Component

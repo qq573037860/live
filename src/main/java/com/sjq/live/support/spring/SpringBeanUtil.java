@@ -1,7 +1,6 @@
 package com.sjq.live.support.spring;
 
 import com.sjq.live.utils.proxy.ClassUtils;
-import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -30,12 +29,12 @@ public class SpringBeanUtil implements ApplicationContextAware {
         registry = (BeanDefinitionRegistry) applicationContext;
     }
 
-    public static <T> BeanWrapper<T> getBean(Class<T> tClass) {
-        return Objects.isNull(applicationContext) ? new BeanWrapper<>(() -> applicationContext.getBean(tClass)) : new BeanWrapper<>(applicationContext.getBean(tClass));
+    public static <T> BeanFactory<T> getBean(Class<T> tClass) {
+        return Objects.isNull(applicationContext) ? new BeanFactory<>(() -> applicationContext.getBean(tClass)) : new BeanFactory<>(applicationContext.getBean(tClass));
     }
 
     public static Object getBean(String name) {
-        return Objects.isNull(applicationContext) ? new BeanWrapper<>(() -> applicationContext.getBean(name)) : new BeanWrapper<>(applicationContext.getBean(name));
+        return Objects.isNull(applicationContext) ? new BeanFactory<>(() -> applicationContext.getBean(name)) : new BeanFactory<>(applicationContext.getBean(name));
     }
 
     public static void registerBean(Class<?> cls) {
@@ -54,17 +53,17 @@ public class SpringBeanUtil implements ApplicationContextAware {
         }
     }
 
-    public static class BeanWrapper<T> {
+    public static class BeanFactory<T> {
 
         T bean;
 
         Supplier<T> beanFactory;
 
-        BeanWrapper(T bean) {
+        BeanFactory(T bean) {
             this.bean = bean;
         }
 
-        BeanWrapper(Supplier<T> beanFactory) {
+        BeanFactory(Supplier<T> beanFactory) {
             this.beanFactory = beanFactory;
         }
 

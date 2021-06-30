@@ -32,15 +32,12 @@ public class NettyHttpHandler extends AbstractNettyHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        //System.out.println("=============================http-start=============================" + Thread.currentThread().getName());
-        //System.out.println(msg);
-        //System.out.println("=============================http-end=============================");
         if (msg instanceof DefaultHttpRequest) {
             final DefaultHttpRequest request = (DefaultHttpRequest) msg;
             processHttpRequest(request, ctx);
         } else if (msg instanceof DefaultHttpContent) {
             final DefaultHttpContent defaultHttpContent = (DefaultHttpContent) msg;
-            processChunkedHttpContent(defaultHttpContent, ctx);
+            processChunkedHttpContent(defaultHttpContent);
         } else if (msg instanceof LastHttpContent) {
             final LastHttpContent lastHttpContent = (LastHttpContent) msg;
             processLastHttpContent(lastHttpContent, ctx);
@@ -74,30 +71,23 @@ public class NettyHttpHandler extends AbstractNettyHandler {
             return;
         }
 
+        try {
+            processNormalHttpRequest(request, ctx);
+        } finally {
+            ReferenceCountUtil.release(request);
+        }
+    }
+
+    private void processNormalHttpRequest(DefaultHttpRequest request, ChannelHandlerContext ctx) throws URISyntaxException {
         // 获取请求参数
         final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
         final Map<String, Object> params = NettyUtils.convertParams(queryStringDecoder.parameters());
         final String path = new URI(request.uri()).getPath();
         final HttpHeaders headers = request.headers();
         final boolean isFullHttpRequest = request instanceof DefaultFullHttpRequest;
-        final ByteBuf content = isFullHttpRequest ? ((DefaultFullHttpRequest)request).content() : null;
 
-        try {
-            processNormalHttpRequest(ctx, path, request.protocolVersion(), request.method().name(), params, headers, isFullHttpRequest);
-        } finally {
-            ReferenceCountUtil.release(content);
-        }
-    }
-
-    private void processNormalHttpRequest(final ChannelHandlerContext ctx,
-                                          final String path,
-                                          final HttpVersion httpVersion,
-                                          final String httpMethod,
-                                          final Map<String, Object> params,
-                                          final HttpHeaders headers,
-                                          final boolean isFullHttpRequest) {
         //注册endPoint
-        nettyHttpEndPointHandlerProxy = NettyEndPointRegister.match(path, HttpMethod.resolve(httpMethod));
+        nettyHttpEndPointHandlerProxy = NettyEndPointRegister.match(path, HttpMethod.resolve(request.method().name()));
 
         //返回404
         if (Objects.isNull(nettyHttpEndPointHandlerProxy)) {
@@ -111,10 +101,8 @@ public class NettyHttpHandler extends AbstractNettyHandler {
         nettyHttpRequest = new NettyHttpRequest();
         nettyHttpRequest.setParams(params);
         nettyHttpRequest.setPath(path);
-        nettyHttpRequest.setHttpVersion(httpVersion);
+        nettyHttpRequest.setHttpVersion(request.protocolVersion());
         nettyHttpRequest.setChunkedReq(StringUtils.equals(headers.get(HttpHeaderNames.TRANSFER_ENCODING), HttpHeaderValues.CHUNKED));
-        //NettyChannelAttribute.setMethodInvokerHandler(ctx, methodInvokerHandler);
-        //NettyChannelAttribute.setNettyHttpRequest(ctx, nettyHttpRequest);
 
         if (nettyHttpRequest.isChunkedReq()) {
             //如果是chunked请求,提前调用
@@ -126,16 +114,13 @@ public class NettyHttpHandler extends AbstractNettyHandler {
     }
 
     private void processFullHttpRequest(final ChannelHandlerContext ctx) {
-        //final MethodInvokerHandler methodInvokerHandler = NettyChannelAttribute.getMethodInvokerHandler(ctx);
         nettyHttpEndPointHandlerProxy.invoke(nettyHttpRequest, ctx);
     }
 
     private void processChunkedRequest(final ChannelHandlerContext ctx) {
         //保存chunkDataHandler
-        //NettyChannelAttribute.getNettyHttpRequest(ctx).setChunkDataHandler(new NettyInputStreamProcessor.ChunkDataHandler());
         nettyHttpRequest.setChunkDataHandler(new NettyInputStreamProcessor.ChunkDataHandler());
         //调用
-        //final MethodInvokerHandler methodInvokerHandler = NettyChannelAttribute.getMethodInvokerHandler(ctx);
         nettyHttpEndPointHandlerProxy.invokeAsync(nettyHttpRequest, ctx);
     }
 
@@ -149,33 +134,25 @@ public class NettyHttpHandler extends AbstractNettyHandler {
         nettyHttpRequest.getChunkDataHandler().reachEnd();
     }
 
-    private void processChunkedHttpContent(final DefaultHttpContent defaultHttpContent,
-                                           final ChannelHandlerContext ctx) {
-        //final NettyHttpRequest nettyHttpRequest = NettyChannelAttribute.getNettyHttpRequest(ctx);
-        final ByteBuf byteBuf = defaultHttpContent.content();
+    private void processChunkedHttpContent(final DefaultHttpContent httpContent) {
+        final ByteBuf byteBuf = httpContent.content();
         try {
             //添加httpChunkContent
             final NettyInputStreamProcessor.ChunkDataHandler chunkDataHandler = nettyHttpRequest.getChunkDataHandler();
             byte[] data = NettyUtils.convertToByteArr(byteBuf);
             chunkDataHandler.offer(data);
         } finally {
-            ReferenceCountUtil.release(byteBuf);
+            ReferenceCountUtil.release(httpContent);
         }
     }
 
-    private void processLastHttpContent(final LastHttpContent lastHttpContent,
+    private void processLastHttpContent(final LastHttpContent httpContent,
                                         final ChannelHandlerContext ctx) {
-        //final NettyHttpRequest nettyHttpRequest = NettyChannelAttribute.getNettyHttpRequest(ctx);
-
         if (isNotFounded) {
             return;
         }
 
-        final ByteBuf byteBuf = lastHttpContent.content();
-
-        /*if (0 == byteBuf.readableBytes() || Unpooled.EMPTY_BUFFER == byteBuf) {
-            return;
-        }*/
+        final ByteBuf byteBuf = httpContent.content();
 
         try {
             if (nettyHttpRequest.isChunkedReq()) {
@@ -186,7 +163,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
                 processFullHttpRequest(ctx);
             }
         } finally {
-            ReferenceCountUtil.release(byteBuf);
+            ReferenceCountUtil.release(httpContent);
         }
     }
 }

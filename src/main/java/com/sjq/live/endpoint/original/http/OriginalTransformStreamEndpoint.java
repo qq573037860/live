@@ -2,7 +2,7 @@ package com.sjq.live.endpoint.original.http;
 
 import com.sjq.live.constant.LiveConfiguration;
 import com.sjq.live.endpoint.original.OriginalEndPointSwitch;
-import com.sjq.live.service.TransformStreamHandler;
+import com.sjq.live.handler.TransformStreamHandler;
 import com.sjq.live.support.original.ServletInputStreamProcessor;
 import com.sjq.live.support.original.ServletOutputStreamProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +38,5 @@ public class OriginalTransformStreamEndpoint{
     @RequestMapping(LiveConfiguration.TRANSFORMED_STREAM_PATH)
     public void transformedStream(HttpServletRequest request, HttpServletResponse response, String publishId) throws Exception {
         transformStreamHandler.processTransformedStream(publishId, new ServletInputStreamProcessor(request.getInputStream()));
-        response.setStatus(200);
     }
 }

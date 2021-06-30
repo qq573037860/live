@@ -32,6 +32,9 @@ public class NettyEndPointRegister {
     private static final Set<String> WS_HANDLER_METHOD_DESCRIPTION_SET = Sets.newHashSet();
     private static final String METHOD_DESCRIPTION_FORMAT = "%s#%s";
 
+    /**
+     * 实例化默认静态资源处理器
+     */
     private static final NettyHttpEndPointHandlerProxy STATIC_RESOURCE_HANDLER = new NettyHttpEndPointHandlerProxy(true);
 
     static {
