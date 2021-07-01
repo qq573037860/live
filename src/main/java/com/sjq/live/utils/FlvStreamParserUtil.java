@@ -141,7 +141,8 @@ public class FlvStreamParserUtil {
                         }
                     }
                     leftTagDataToRead -= len - tagDataIndex;
-                    if (leftTagDataToRead >= 0) {//继续读
+                    //继续读
+                    if (leftTagDataToRead >= 0) {
                         break;
                     }
                     //读完一个tag后之后还有剩余，重置读取tagHeader的参数
@@ -149,7 +150,7 @@ public class FlvStreamParserUtil {
                     tagHeaderSize = 0;
                 }
             } while ((bytes = in.read()) != null);
-            logger.error("解析flv流结束");
+            logger.info("解析flv流结束");
         } catch (IOException e) {
             logger.error("解析flv流失败", e);
             throw e;

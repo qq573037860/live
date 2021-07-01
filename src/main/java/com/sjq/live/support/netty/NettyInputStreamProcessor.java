@@ -3,9 +3,9 @@ package com.sjq.live.support.netty;
 import com.sjq.live.model.LiveException;
 import com.sjq.live.model.NettyHttpContext;
 import com.sjq.live.support.InputStreamProcessor;
-import com.sjq.live.utils.NettyUtils;
+import com.sjq.live.support.OutputStreamProcessor;
 import com.sjq.live.utils.Queue;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelFuture;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -28,7 +28,8 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
 
     @Override
     public void close() throws IOException {
-        outputStream.close();
+        ChannelFuture future = outputStream.close();
+        NettyChannelAttribute.setLastChannelFuture(outputStream.getCtx(), future);
     }
 
     public static class ChunkDataHandler {
@@ -51,11 +52,16 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
             chunkQueue.offer(data);
         }
 
+
         public byte[] poll() throws IOException {
             byte[] data;
             for (;;) {
                 data = chunkQueue.poll();
                 if (Objects.nonNull(data) || isProduceEnd) {
+                    if (isProduceEnd) {
+                        System.out.println("延时：" + (System.currentTimeMillis() - OutputStreamProcessor.st));
+                        System.out.println();
+                    }
                     break;
                 }
                 if (Objects.nonNull(exception)) {

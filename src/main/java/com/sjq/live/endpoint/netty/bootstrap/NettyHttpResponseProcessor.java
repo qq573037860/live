@@ -2,7 +2,9 @@ package com.sjq.live.endpoint.netty.bootstrap;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sjq.live.model.NettyHttpRequest;
+import com.sjq.live.support.netty.NettyChannelAttribute;
 import com.sjq.live.utils.NettyUtils;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Method;
@@ -28,24 +30,27 @@ public class NettyHttpResponseProcessor {
             return;
         }
 
+        final ChannelFuture future;
         if (method.getReturnType() == String.class) {
             String result = response.toString();
             if (isStaticResource(result)) {
                 //处理静态文件资源
-                processStaticResourceResponse(context, nettyHttpRequest,result);
+                future = processStaticResourceResponse(context, nettyHttpRequest,result);
             } else {
                 //直接返回String
-                response(context, result);
+                future = response(context, result);
             }
         } else {
             if (method.isAnnotationPresent(NettyResponseBody.class)) {
                 // 返回json
-                response(context, JSONObject.toJSONString(response));
+                future = response(context, JSONObject.toJSONString(response));
             } else {
-                response(context, response.toString());
+                future = response(context, response.toString());
             }
         }
 
+        context.flush();
+        NettyChannelAttribute.setLastChannelFuture(context, future);
     }
 
     /**
@@ -53,9 +58,8 @@ public class NettyHttpResponseProcessor {
      * @param context
      * @param result
      */
-    private static void response(ChannelHandlerContext context, String result) {
-        NettyUtils.writeHttpOkResponse(context, result.getBytes());
-        context.flush();
+    private static ChannelFuture response(ChannelHandlerContext context, String result) {
+        return NettyUtils.writeHttpOkResponse(context, result.getBytes());
     }
 
     /**
@@ -64,9 +68,8 @@ public class NettyHttpResponseProcessor {
      * @param nettyHttpRequest
      * @param path
      */
-    private static void processStaticResourceResponse(ChannelHandlerContext context, NettyHttpRequest nettyHttpRequest, String path) {
-        NettyUtils.writeHttpOkResponse(context, nettyHttpRequest.getHttpVersion(), nettyHttpRequest.isKeepAlive(), path);
-        context.flush();
+    private static ChannelFuture processStaticResourceResponse(ChannelHandlerContext context, NettyHttpRequest nettyHttpRequest, String path) {
+        return NettyUtils.writeHttpOkResponse(context, nettyHttpRequest.getHttpVersion(), nettyHttpRequest.isKeepAlive(), path);
     }
 
 

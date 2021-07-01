@@ -107,11 +107,11 @@ public class NettyEndPointRegister {
 
             //InvokerHandler绑定
             for (Method method : methods) {
-                NettyEndPoint methodAnnotation = method.getAnnotation(NettyEndPoint.class);
-                if (Objects.nonNull(methodAnnotation)) {
-                    String key = buildKey(prefixPath + methodAnnotation.path(), methodAnnotation.method());
+                NettyEndPoint annotation = method.getAnnotation(NettyEndPoint.class);
+                if (Objects.nonNull(annotation)) {
+                    String key = buildKey(prefixPath + annotation.path(), annotation.method());
                     METHOD_INVOKER_HOLDER_MAP.put(key, new NettyHttpEndPointHandlerProxy(Wrapper.makeWrapper(cls, methods.toArray(new Method[0])),
-                            SpringBeanUtil.getBean(cls), method));
+                            SpringBeanUtil.getBean(cls), method, annotation.isLongLink()));
                 }
             }
             if (isImplementNettyWebsocketInterface) {

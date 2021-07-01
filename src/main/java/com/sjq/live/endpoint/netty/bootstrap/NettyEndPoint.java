@@ -17,5 +17,5 @@ public @interface NettyEndPoint {
      */
     HttpMethod method() default HttpMethod.GET;
 
-
+    boolean isLongLink() default false;
 }

@@ -2,6 +2,7 @@ package com.sjq.live.support.netty;
 
 
 import com.sjq.live.utils.NettyUtils;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
 public class NettyOutputStream {
@@ -27,7 +28,11 @@ public class NettyOutputStream {
         ctx.flush();
     }
 
-    public void close() {
-        NettyUtils.writeLastEmptyContentResponse(ctx);
+    public ChannelFuture close() {
+        return NettyUtils.writeLastEmptyContentResponse(ctx);
+    }
+
+    public ChannelHandlerContext getCtx() {
+        return ctx;
     }
 }

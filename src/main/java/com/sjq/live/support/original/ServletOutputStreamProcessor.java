@@ -2,6 +2,8 @@ package com.sjq.live.support.original;
 
 import com.sjq.live.model.LiveException;
 import com.sjq.live.support.OutputStreamProcessor;
+import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.Future;
 import org.springframework.util.Assert;
 
 import javax.servlet.ServletOutputStream;

@@ -3,6 +3,7 @@ package com.sjq.live.handler;
 import com.sjq.live.model.LiveException;
 import com.sjq.live.model.OperateResponse;
 import com.sjq.live.support.*;
+import io.netty.util.concurrent.Future;
 
 public interface TransformStreamHandler {
 

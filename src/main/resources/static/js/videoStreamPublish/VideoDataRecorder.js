@@ -10,7 +10,7 @@
         _defaultParam : {
             "record" : {
                 "audio": {"sampleSize":8,"channelCount":1,"echoCancellation":false},
-                "video": {"width":320,"height":240,"frameRate":1,"sampleRate":1}
+                "video": {"width":320,"height":240,"frameRate":15,"sampleRate":15}
             },
             "videoDom" : null,
             "URL" : window.URL || window.webkitURL,
@@ -64,9 +64,9 @@
             let _self = this;
             //视频数据录制
             if (this._defaultParam.dataHandler) {
-                let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm',audioBitsPerSecond: 250,videoBitsPerSecond: 1000,});
+                let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm',audioBitsPerSecond: 256,videoBitsPerSecond: 1024,});
                 this._defaultParam.recorder = recorder;
-                recorder.start(50);
+                recorder.start(1);
                 let fr = new FileReader();
                 fr.addEventListener("loadend", function (d) {
                     //reader.result是一个含有视频数据流的Blob对象
@@ -115,8 +115,10 @@
                     $dom.srcObject = stream;
                 }
                 this._defaultParam.stream = stream;
-                self._start();
                 $dom.play();
+                setTimeout(function(){
+                    self._start();
+                }, 1000)
             },
             error : function (e) {
                 alert("访问用户媒体设备失败：" + e.name + "；" + e.message);

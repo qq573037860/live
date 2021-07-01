@@ -33,7 +33,6 @@ public class DistributeStreamProcessor {
             FlvStreamParserUtil.parseStream(inputStreamProcessor, (tagData, flvHeaderData, isTagHeaderStart) -> {
                 //发送tag数据
                 subscribes.parallelStream().forEach(abstractStreamDistributeHandler -> {
-                    // todo 处理异常关闭场景
                     abstractStreamDistributeHandler.send(tagData, flvHeaderData, isTagHeaderStart);
                 });
                 //sendJob.add(new SendHolder(isTagHeaderStart, flvHeaderData, tagData));

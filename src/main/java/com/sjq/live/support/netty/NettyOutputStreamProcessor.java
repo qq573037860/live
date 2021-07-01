@@ -1,6 +1,7 @@
 package com.sjq.live.support.netty;
 
 import com.sjq.live.support.OutputStreamProcessor;
+import io.netty.channel.ChannelFuture;
 import org.springframework.util.Assert;
 
 public class NettyOutputStreamProcessor extends OutputStreamProcessor {
@@ -25,6 +26,7 @@ public class NettyOutputStreamProcessor extends OutputStreamProcessor {
 
     @Override
     protected void closeStream() {
-        outputStream.close();
+        ChannelFuture future = outputStream.close();
+        NettyChannelAttribute.setLastChannelFuture(outputStream.getCtx(), future);
     }
 }

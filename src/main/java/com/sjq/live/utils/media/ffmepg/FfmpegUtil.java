@@ -64,27 +64,27 @@ public class FfmpegUtil {
         command.add("-i");
         command.add(srcUrl);
 
-        command.add("-tune");
-        command.add("zerolatency");
-
-        command.add("-threads");
-        command.add("8");
+        //command.add("-threads");
+        //command.add("2");
 
         command.add("-preset");
         command.add("ultrafast");
 
-        command.add("-c:v");
+        command.add("-vcodec");
         command.add("libx264");
         //command.add("h264_qsv");
 
         command.add("-acodec");
         command.add("aac");
 
+        command.add("-tune");
+        command.add("zerolatency");
+
         //command.add("-vcodec");
         //command.add("h264_qsv");
 
-        command.add("-crf");
-        command.add("28");
+        //command.add("-crf");
+        //command.add("28");
 
         command.add("-f");
         command.add("flv");

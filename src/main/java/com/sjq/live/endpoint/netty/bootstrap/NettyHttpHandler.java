@@ -114,7 +114,7 @@ public class NettyHttpHandler extends AbstractNettyHandler {
     }
 
     private void processFullHttpRequest(final ChannelHandlerContext ctx) {
-        nettyHttpEndPointHandlerProxy.invoke(nettyHttpRequest, ctx);
+        nettyHttpEndPointHandlerProxy.invokeAsync(nettyHttpRequest, ctx);
     }
 
     private void processChunkedRequest(final ChannelHandlerContext ctx) {

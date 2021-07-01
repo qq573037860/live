@@ -5,8 +5,10 @@ import com.sjq.live.endpoint.netty.NettyEndPointSwitch;
 import com.sjq.live.endpoint.netty.bootstrap.NettyEndPoint;
 import com.sjq.live.model.NettyHttpContext;
 import com.sjq.live.handler.TransformStreamHandler;
+import com.sjq.live.support.netty.NettyChannelAttribute;
 import com.sjq.live.support.netty.NettyInputStreamProcessor;
 import com.sjq.live.support.netty.NettyOutputStreamProcessor;
+import io.netty.channel.ChannelFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpMethod;
@@ -27,7 +29,7 @@ public class NettyTransformStreamEndpoint {
      * @param context
      * @throws Exception
      */
-    @NettyEndPoint(path = LiveConfiguration.ORIGIN_STREAM_PATH, method = HttpMethod.GET)
+    @NettyEndPoint(path = LiveConfiguration.ORIGIN_STREAM_PATH, method = HttpMethod.GET, isLongLink = true)
     public void originStream(final NettyHttpContext context) throws Exception {
         final Map<String, Object> params = context.getHttpRequest().getParams();
         transformStreamHandler.processOriginalStream((String) params.get("publishId"), new NettyOutputStreamProcessor(context.getOutputStream()));
@@ -38,7 +40,7 @@ public class NettyTransformStreamEndpoint {
      * @param context
      * @throws Exception
      */
-    @NettyEndPoint(path = LiveConfiguration.TRANSFORMED_STREAM_PATH, method = HttpMethod.POST)
+    @NettyEndPoint(path = LiveConfiguration.TRANSFORMED_STREAM_PATH, method = HttpMethod.POST, isLongLink = true)
     public void transformedStream(final NettyHttpContext context) throws Exception {
         final Map<String, Object> params = context.getHttpRequest().getParams();
         transformStreamHandler.processTransformedStream((String) params.get("publishId"), new NettyInputStreamProcessor(context));

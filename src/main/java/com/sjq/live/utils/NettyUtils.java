@@ -29,21 +29,20 @@ public class NettyUtils {
         writeSimpleHttpResponse(ctx, HttpResponseStatus.OK);
     }
 
-    public static void writeHttpOkResponse(final ChannelHandlerContext ctx,
+    public static ChannelFuture writeHttpOkResponse(final ChannelHandlerContext ctx,
                                            final byte[] data) {
-        writeHttpResponse(ctx, HttpResponseStatus.OK, data);
+        return writeHttpResponse(ctx, HttpResponseStatus.OK, data);
     }
 
-    public static void writeHttpOkResponse(final ChannelHandlerContext ctx,
-                                           final HttpVersion httpVersion,
-                                           final boolean isKeepAlive,
-                                           final String filePath) {
+    public static ChannelFuture writeHttpOkResponse(final ChannelHandlerContext ctx,
+                                                    final HttpVersion httpVersion,
+                                                    final boolean isKeepAlive,
+                                                    final String filePath) {
         File file;
         try {
             file = ResourceUtils.getFile("classpath:" + filePath);
         } catch (FileNotFoundException e) {
-            writeHttpNotFoundResponse(ctx);
-            return;
+            return writeHttpNotFoundResponse(ctx);
         }
 
         // 写入文件头部
@@ -53,10 +52,7 @@ public class NettyUtils {
         writeFileBodyResponse(file, ctx);
 
         // 写入文件尾部
-        ChannelFuture future = writeLastEmptyContentResponse(ctx);
-        if (!isKeepAlive) {
-            future.addListener(ChannelFutureListener.CLOSE);
-        }
+        return writeLastEmptyContentResponse(ctx);
     }
 
     public static void writeFileBodyResponse(final File file, final ChannelHandlerContext ctx) {
@@ -114,27 +110,27 @@ public class NettyUtils {
         ctx.write(response);
     }
 
-    public static void writeHttpNotFoundResponse(final ChannelHandlerContext ctx) {
-        writeSimpleHttpResponse(ctx, HttpResponseStatus.NOT_FOUND);
+    public static ChannelFuture writeHttpNotFoundResponse(final ChannelHandlerContext ctx) {
+        return writeSimpleHttpResponse(ctx, HttpResponseStatus.NOT_FOUND);
     }
 
     public static void writeHttpBadRequestResponse(final ChannelHandlerContext ctx) {
         writeSimpleHttpResponse(ctx, HttpResponseStatus.BAD_REQUEST);
     }
 
-    public static void writeSimpleHttpResponse(final ChannelHandlerContext ctx,
+    public static ChannelFuture writeSimpleHttpResponse(final ChannelHandlerContext ctx,
                                                final HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
-        ctx.write(response);
+        return ctx.write(response);
     }
 
-    public static void writeHttpResponse(final ChannelHandlerContext ctx,
+    public static ChannelFuture writeHttpResponse(final ChannelHandlerContext ctx,
                                          final HttpResponseStatus status,
                                          final byte[] data) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(data));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, 0);
-        ctx.write(response);
+        return ctx.write(response);
     }
 
     public static void writeHttpChunkResponse(final ChannelHandlerContext ctx) {

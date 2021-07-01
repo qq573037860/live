@@ -32,6 +32,7 @@ public abstract class AbstractNettyHandler extends ChannelInboundHandlerAdapter 
         } finally {
             NettyChannelAttribute.clearAllAttribute(ctx);
             ctx.fireChannelInactive();
+            ctx.close();
         }
     }
 
@@ -45,6 +46,7 @@ public abstract class AbstractNettyHandler extends ChannelInboundHandlerAdapter 
         } finally {
             NettyChannelAttribute.clearAllAttribute(ctx);
             ctx.fireExceptionCaught(cause);
+            ctx.close();
         }
     }
 

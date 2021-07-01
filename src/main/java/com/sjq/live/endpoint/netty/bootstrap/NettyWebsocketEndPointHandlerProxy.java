@@ -9,14 +9,14 @@ import java.util.concurrent.*;
 
 public class NettyWebsocketEndPointHandlerProxy implements NettyWebsocketEndPointHandler {
 
-    private static final ExecutorService poolExecutor = new ThreadPoolExecutor(
+    private static final ExecutorService POOL_EXECUTOR = new ThreadPoolExecutor(
             1,
             Runtime.getRuntime().availableProcessors(),
             6000L,
             TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(1000),
             new DefaultThreadFactory("websocket任务线程", true),
-            new ThreadPoolExecutor.CallerRunsPolicy());
+            new ThreadPoolExecutor.AbortPolicy());
 
     private final SpringBeanUtil.BeanFactory<NettyWebsocketEndPointHandler> beanFactory;
 
@@ -36,7 +36,7 @@ public class NettyWebsocketEndPointHandlerProxy implements NettyWebsocketEndPoin
 
     @Override
     public void handleMessage(final NettyWebsocketContext context, byte[] data, boolean isLast) {
-        poolExecutor.execute(() -> {
+        POOL_EXECUTOR.execute(() -> {
             try {
                 beanFactory.getBean().handleMessage(context, data, isLast);
             } catch (Exception e) {
@@ -47,7 +47,7 @@ public class NettyWebsocketEndPointHandlerProxy implements NettyWebsocketEndPoin
 
     @Override
     public void handleMessage(final NettyWebsocketContext context, String data, boolean isLast) {
-        poolExecutor.execute(() -> {
+        POOL_EXECUTOR.execute(() -> {
             try {
                 beanFactory.getBean().handleMessage(context, data, isLast);
             } catch (Exception e) {
