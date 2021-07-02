@@ -1,16 +1,21 @@
 package com.sjq.live.support.netty;
 
+import com.sjq.live.endpoint.netty.websocket.PublishVideoStreamEndpointEndPointNetty;
 import com.sjq.live.model.LiveException;
 import com.sjq.live.model.NettyHttpContext;
 import com.sjq.live.support.InputStreamProcessor;
 import com.sjq.live.support.OutputStreamProcessor;
 import com.sjq.live.utils.Queue;
 import io.netty.channel.ChannelFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
 
 public class NettyInputStreamProcessor implements InputStreamProcessor {
+
+    private static final Logger logger = LoggerFactory.getLogger(NettyInputStreamProcessor.class);
 
     private final ChunkDataHandler chunkDataHandler;
 
@@ -42,10 +47,11 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
 
         public void exceptionOccurred(LiveException exception) {
             this.exception = exception;
+            reachEnd();
         }
 
         public void reachEnd() {
-            isProduceEnd = true;
+            this.isProduceEnd = true;
         }
 
         public void offer(byte[] data) {
@@ -58,15 +64,12 @@ public class NettyInputStreamProcessor implements InputStreamProcessor {
             for (;;) {
                 data = chunkQueue.poll();
                 if (Objects.nonNull(data) || isProduceEnd) {
-                    if (isProduceEnd) {
-                        System.out.println("延时：" + (System.currentTimeMillis() - OutputStreamProcessor.st));
-                        System.out.println();
+                    if (Objects.nonNull(exception)) {
+                        logger.error("netty连接异常", exception);
                     }
                     break;
                 }
-                if (Objects.nonNull(exception)) {
-                    throw new IOException("netty连接异常", exception);
-                }
+
             }
             return data;
         }

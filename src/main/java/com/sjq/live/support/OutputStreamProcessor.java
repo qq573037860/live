@@ -67,15 +67,12 @@ public abstract class OutputStreamProcessor {
         write(new byte[]{});
     }
 
-    public static Long st = null;
-
     public void processData() {
         for (;;) {
             byte[] bytes = queue.poll(10L);
             if (Objects.isNull(bytes)) {
                 continue;
             } else if (bytes.length == 0) {
-                st = System.currentTimeMillis();
                 break;
             }
             writeToStream(bytes);

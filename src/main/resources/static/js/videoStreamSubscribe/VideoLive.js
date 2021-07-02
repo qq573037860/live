@@ -13,6 +13,7 @@
                 type : 'flv',
                 isLive : true,
                 withCredentials : false,
+                liveBufferLatencyChasing: true,
                 hasAudio : true,
                 hasVideo : true,
                 duration: 0
@@ -21,13 +22,8 @@
                 enableWorker: true,
                 /*seekType: 'range',*/
                 enableStashBuffer: false,
-                stashInitialSize: undefined,
                 isLive: true,
-                lazyLoad: false,
-                lazyLoadMaxDuration: 0,
-                lazyLoadRecoverDuration: 0,
-                deferLoadAfterSourceOpen: false,
-                fixAudioTimestampGap: false,
+                lazyLoad: false
             },
             recordJson : {}
         },
@@ -41,7 +37,7 @@
             }
 
             this._defaultParam.mediaDataSource["url"] = this._defaultParam.pushUrl + "subscribeId=" + subscribeId + "&userId=" + new Date().getTime();
-            let player = flvjs.createPlayer(this._defaultParam.mediaDataSource, this._defaultParam.optionalConfig);
+            let player = mpegts.createPlayer(this._defaultParam.mediaDataSource, this._defaultParam.optionalConfig);
             player.attachMediaElement(videoDom);
             player.load();
             this._defaultParam.recordJson[subscribeId] = {
@@ -52,15 +48,15 @@
             player.play();
 
             //避免时间长时间积累缓冲导致延迟越来越高
-            setInterval(() => {
-                /*let end = videoDom.endTime;
+            /*setInterval(() => {
+                /!*let end = videoDom.endTime;
                 if (!end) {
                     return;
                 }
                 let diff = end - videoDom.currentTime;
                 if (diff >= 0.5) {
                     videoDom.currentTime = end;
-                }*/
+                }*!/
 
                 if (player.buffered.length) {
                     let end = player.buffered.end(0);//获取当前buffered值
@@ -71,7 +67,7 @@
                     }
                 }
                 console.info((player.buffered.end(0) - player.currentTime) + "-" + player.buffered.end(0) + "-" + player.currentTime)
-            }, 2000);
+            }, 2000);*/
         },
         _destoryPlayer : function(player) {
             player.pause();

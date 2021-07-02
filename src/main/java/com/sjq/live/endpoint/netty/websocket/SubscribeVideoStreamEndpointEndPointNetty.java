@@ -76,10 +76,10 @@ public class SubscribeVideoStreamEndpointEndPointNetty implements NettyWebsocket
         public void onData(final byte[] bytes) {
             try {
                 channelHandler.write(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)));
-                if ((lengthCount += bytes.length) > 512) {
-                    lengthCount = 0;
+                /*if ((lengthCount += bytes.length) > 512) {
+                    lengthCount = 0;*/
                     channelHandler.flush();
-                }
+                //}
             } catch (Exception e) {
                 logger.error("session:{}，数据发送失败！", channelHandler.toString(), e);
                 channelHandler.close();

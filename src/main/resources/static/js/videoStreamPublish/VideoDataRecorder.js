@@ -10,7 +10,7 @@
         _defaultParam : {
             "record" : {
                 "audio": {"sampleSize":8,"channelCount":1,"echoCancellation":false},
-                "video": {"width":320,"height":240,"frameRate":15,"sampleRate":15}
+                "video": {"width":320,"height":240,"frameRate":24,"sampleRate":24}
             },
             "videoDom" : null,
             "URL" : window.URL || window.webkitURL,
@@ -66,7 +66,7 @@
             if (this._defaultParam.dataHandler) {
                 let recorder = new MediaRecorder(this._defaultParam.stream, {mimeType: 'video/webm',audioBitsPerSecond: 256,videoBitsPerSecond: 1024,});
                 this._defaultParam.recorder = recorder;
-                recorder.start(1);
+                recorder.start(20);
                 let fr = new FileReader();
                 fr.addEventListener("loadend", function (d) {
                     //reader.result是一个含有视频数据流的Blob对象
