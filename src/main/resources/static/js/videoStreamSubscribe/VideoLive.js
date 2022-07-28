@@ -23,7 +23,8 @@
                 /*seekType: 'range',*/
                 enableStashBuffer: false,
                 isLive: true,
-                lazyLoad: false
+                lazyLoad: false,
+                stashInitialSize: 128
             },
             recordJson : {}
         },
@@ -46,6 +47,24 @@
             };
 
             player.play();
+
+            videoDom.addEventListener("progress", () => {
+                let end = player.buffered.end(0); //获取当前buffered值(缓冲区末尾)
+                let delta = end - player.currentTime; //获取buffered与当前播放位置的差值
+
+                // 延迟过大，通过跳帧的方式更新视频
+                if (delta > 10 || delta < 0) {
+                    this.player.currentTime = this.player.buffered.end(0) - 1;
+                    return;
+                }
+
+                // 追帧
+                if (delta > 1) {
+                    videoDom.playbackRate = 1.1;
+                } else {
+                    videoDom.playbackRate = 1;
+                }
+            });
 
             //避免时间长时间积累缓冲导致延迟越来越高
             /*setInterval(() => {
