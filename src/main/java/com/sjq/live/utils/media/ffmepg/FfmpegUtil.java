@@ -80,6 +80,19 @@ public class FfmpegUtil {
         command.add("-tune");
         command.add("zerolatency");
 
+        command.add("-r");
+        command.add("25");
+
+        command.add("-g");
+        command.add("0");
+
+        command.add("-fflags");
+        command.add("nobuffer");
+
+        command.add("-nocache");
+
+
+
         //command.add("-vcodec");
         //command.add("h264_qsv");
 
